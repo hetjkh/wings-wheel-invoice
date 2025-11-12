@@ -27,6 +27,9 @@ import {
 } from "@/lib/variables";
 
 // Helpers
+import { getCurrentInvoiceNumber, getNextInvoiceNumber } from "@/lib/helpers";
+
+// Helpers
 const readDraftFromLocalStorage = (): InvoiceType | null => {
   if (typeof window === "undefined") return null;
   try {
@@ -77,9 +80,17 @@ const Providers = ({ children }: ProvidersProps) => {
           signature: (draft.details?.signature?.data && draft.details.signature.data.trim() !== "") 
             ? draft.details.signature 
             : FORM_DEFAULT_VALUES.details.signature,
+          // Auto-generate invoice number if empty (use current number, don't increment)
+          invoiceNumber: (draft.details?.invoiceNumber && draft.details.invoiceNumber.trim() !== "")
+            ? draft.details.invoiceNumber
+            : getCurrentInvoiceNumber(),
         },
       };
       form.reset(mergedDraft, { keepDefaultValues: false });
+    } else {
+      // If no draft, set the invoice number for a new invoice (use current number, don't increment)
+      const currentInvoiceNumber = getCurrentInvoiceNumber();
+      form.setValue("details.invoiceNumber", currentInvoiceNumber);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

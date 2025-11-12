@@ -32,6 +32,7 @@ export const CURRENCIES_API =
 export const LOCAL_STORAGE_INVOICE_DRAFT_KEY = "invoify:invoiceDraft";
 export const LOCAL_STORAGE_DOWNLOAD_DIRECTORY_KEY = "invoify:downloadDirectory";
 export const LOCAL_STORAGE_SAVED_PAYMENT_INFO_KEY = "invoify:savedPaymentInfo";
+export const LOCAL_STORAGE_LAST_INVOICE_NUMBER_KEY = "invoify:lastInvoiceNumber";
 
 /**
  * Tailwind

@@ -30,6 +30,9 @@ import {
   LOCAL_STORAGE_INVOICE_DRAFT_KEY,
 } from "@/lib/variables";
 
+// Helpers
+import { getNextInvoiceNumber } from "@/lib/helpers";
+
 // Types
 import { ExportTypes, InvoiceType } from "@/types";
 
@@ -80,7 +83,7 @@ export const InvoiceContextProvider = ({
   } = useToasts();
 
   // Get form values and methods from form context
-  const { getValues, reset, watch } = useFormContext<InvoiceType>();
+  const { getValues, reset, watch, setValue } = useFormContext<InvoiceType>();
 
   // Variables
   const [invoicePdf, setInvoicePdf] = useState<Blob>(new Blob());
@@ -140,7 +143,19 @@ export const InvoiceContextProvider = ({
    * Generates a new invoice.
    */
   const newInvoice = () => {
-    reset(FORM_DEFAULT_VALUES);
+    // Get the next invoice number
+    const nextInvoiceNumber = getNextInvoiceNumber();
+    
+    // Reset form with default values and set the new invoice number
+    const defaultValuesWithInvoiceNumber = {
+      ...FORM_DEFAULT_VALUES,
+      details: {
+        ...FORM_DEFAULT_VALUES.details,
+        invoiceNumber: nextInvoiceNumber,
+      },
+    };
+    
+    reset(defaultValuesWithInvoiceNumber);
     setInvoicePdf(new Blob());
 
     // Clear the draft

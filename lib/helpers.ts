@@ -8,6 +8,9 @@ import numberToWords from "number-to-words";
 import currenciesDetails from "@/public/assets/data/currencies.json";
 import { CurrencyDetails } from "@/types";
 
+// Variables
+import { LOCAL_STORAGE_LAST_INVOICE_NUMBER_KEY } from "@/lib/variables";
+
 /**
  * Formats a number with commas and decimal places
  *
@@ -184,6 +187,60 @@ const isImageUrl = (str: string) => {
 };
 
 /**
+ * Gets the current invoice number without incrementing
+ * @returns {string} The current invoice number as a string (returns "1" if none exists)
+ */
+const getCurrentInvoiceNumber = (): string => {
+    if (typeof window === "undefined") return "1";
+    
+    try {
+        const lastNumberStr = window.localStorage.getItem(LOCAL_STORAGE_LAST_INVOICE_NUMBER_KEY);
+        if (!lastNumberStr) {
+            // If no number exists, return "1" for the first invoice
+            return "1";
+        }
+        const lastNumber = parseInt(lastNumberStr, 10);
+        // Return the last number (which is the current highest invoice number)
+        return lastNumber.toString();
+    } catch {
+        return "1";
+    }
+};
+
+/**
+ * Gets the next invoice number and increments the counter
+ * @returns {string} The next invoice number as a string
+ */
+const getNextInvoiceNumber = (): string => {
+    if (typeof window === "undefined") return "1";
+    
+    try {
+        const lastNumberStr = window.localStorage.getItem(LOCAL_STORAGE_LAST_INVOICE_NUMBER_KEY);
+        let nextNumber: number;
+        
+        if (!lastNumberStr) {
+            // If no number exists, start with 1
+            nextNumber = 1;
+        } else {
+            // Increment from the last number
+            const lastNumber = parseInt(lastNumberStr, 10);
+            nextNumber = lastNumber + 1;
+        }
+        
+        // Save the new number
+        window.localStorage.setItem(LOCAL_STORAGE_LAST_INVOICE_NUMBER_KEY, nextNumber.toString());
+        
+        return nextNumber.toString();
+    } catch {
+        // If there's an error, set it to 1 and return it
+        if (typeof window !== "undefined") {
+            window.localStorage.setItem(LOCAL_STORAGE_LAST_INVOICE_NUMBER_KEY, "1");
+        }
+        return "1";
+    }
+};
+
+/**
  * Dynamically imports and retrieves an invoice template React component based on the provided template ID.
  *
  * @param {number} templateId - The ID of the invoice template.
@@ -229,6 +286,8 @@ export {
     isValidEmail,
     isDataUrl,
     isImageUrl,
+    getCurrentInvoiceNumber,
+    getNextInvoiceNumber,
     getInvoiceTemplate,
     fileToBuffer,
 };
