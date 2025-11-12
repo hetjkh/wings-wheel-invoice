@@ -111,6 +111,7 @@ const ItemSchema = z.object({
     unitPrice: fieldValidators.unitPrice,
     total: fieldValidators.stringToNumber,
     passengerName: fieldValidators.stringOptional,
+    serviceType: fieldValidators.stringOptional,
 });
 
 const PaymentInformationSchema = z.object({

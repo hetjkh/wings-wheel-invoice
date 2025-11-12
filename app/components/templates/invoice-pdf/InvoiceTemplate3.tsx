@@ -75,6 +75,21 @@ const InvoiceTemplate = (data: InvoiceType) => {
           </div>
         </div>
 
+        {/* Billed To - Right Side */}
+        <div className="flex justify-end">
+          <div className="text-right space-y-2 text-sm text-gray-700">
+            <p className="uppercase text-xs font-semibold tracking-widest text-gray-500">
+              Billed To
+            </p>
+            <p className="font-semibold text-gray-900">{receiver.name}</p>
+            <p>
+              {receiver.city}, {receiver.country}
+            </p>
+            <p>{receiver.email}</p>
+            <p>{receiver.phone}</p>
+          </div>
+        </div>
+
         {/* Passenger & itinerary table */}
         <div className="overflow-hidden rounded-lg border border-gray-400">
           <table className="min-w-full border-collapse">
@@ -89,6 +104,9 @@ const InvoiceTemplate = (data: InvoiceType) => {
                 <th className="border border-gray-400 px-4 py-3 text-left w-48">
                   Airlines
                 </th>
+                <th className="border border-gray-400 px-4 py-3 text-left w-40">
+                  Service Type
+                </th>
                 <th className="border border-gray-400 px-4 py-3 text-right w-44">
                   Amount
                 </th>
@@ -98,7 +116,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
               {itinerary.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="border border-gray-400 px-4 py-6 text-center italic text-gray-500"
                   >
                     No travel segments provided.
@@ -126,6 +144,9 @@ const InvoiceTemplate = (data: InvoiceType) => {
                         </p>
                       )}
                     </td>
+                    <td className="border border-gray-400 px-4 py-4 text-gray-700">
+                      {item.serviceType || "-"}
+                    </td>
                     <td className="border border-gray-400 px-4 py-4 text-right font-medium">
                       {formatNumberWithCommas(Number(item.total) || 0)}{" "}
                       {details.currency}
@@ -140,17 +161,6 @@ const InvoiceTemplate = (data: InvoiceType) => {
         {/* Totals */}
         <div className="grid md:grid-cols-2 gap-6 items-start">
           <div className="space-y-4 text-sm text-gray-700">
-            <div>
-              <p className="uppercase text-xs font-semibold tracking-widest text-gray-500">
-                Billed To
-              </p>
-              <p className="font-semibold text-gray-900">{receiver.name}</p>
-              <p>
-                {receiver.city}, {receiver.country}
-              </p>
-              <p>{receiver.email}</p>
-              <p>{receiver.phone}</p>
-            </div>
             {details.additionalNotes && (
               <div>
                 <p className="uppercase text-xs font-semibold tracking-widest text-gray-500">

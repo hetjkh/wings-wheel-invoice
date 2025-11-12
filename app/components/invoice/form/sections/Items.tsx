@@ -77,6 +77,7 @@ const Items = () => {
                         unitPrice: 0,
                         total: 0,
                         passengerName: "",
+                        serviceType: "",
                     });
                 }
             } else if (numberOfPassengers < currentCount && currentCount > 0) {
@@ -106,6 +107,7 @@ const Items = () => {
             unitPrice: 0,
             total: 0,
             passengerName: "",
+            serviceType: "",
         });
     };
 

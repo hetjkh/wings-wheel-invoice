@@ -149,6 +149,7 @@ export const FORM_DEFAULT_VALUES = {
         unitPrice: 0,
         total: 0,
         passengerName: "",
+        serviceType: "",
       },
     ],
     currency: "USD",

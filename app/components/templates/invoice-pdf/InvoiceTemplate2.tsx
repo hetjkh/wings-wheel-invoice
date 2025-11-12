@@ -78,9 +78,12 @@ const InvoiceTemplate2 = (data: InvoiceType) => {
 
             <div className="mt-3">
                 <div className="border border-gray-200 p-1 rounded-lg space-y-1">
-                    <div className="hidden sm:grid sm:grid-cols-5">
+                    <div className="hidden sm:grid sm:grid-cols-6">
                         <div className="sm:col-span-2 text-xs font-medium text-gray-500 uppercase">
                             Item
+                        </div>
+                        <div className="text-left text-xs font-medium text-gray-500 uppercase">
+                            Service Type
                         </div>
                         <div className="text-left text-xs font-medium text-gray-500 uppercase">
                             Qty
@@ -93,7 +96,7 @@ const InvoiceTemplate2 = (data: InvoiceType) => {
                         </div>
                     </div>
                     <div className="hidden sm:block border-b border-gray-200"></div>
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-y-1">
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-y-1">
                         {details.items.map((item, index) => (
                             <React.Fragment key={index}>
                                 <div className="col-span-full sm:col-span-2 border-b border-gray-300">
@@ -105,6 +108,11 @@ const InvoiceTemplate2 = (data: InvoiceType) => {
                                     </p>
                                     <p className="text-xs text-gray-600 whitespace-pre-line mt-1">
                                         {item.description}
+                                    </p>
+                                </div>
+                                <div className="border-b border-gray-300">
+                                    <p className="text-gray-800 text-sm">
+                                        {item.serviceType || "-"}
                                     </p>
                                 </div>
                                 <div className="border-b border-gray-300">

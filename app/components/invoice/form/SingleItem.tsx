@@ -12,6 +12,20 @@ import { CSS } from "@dnd-kit/utilities";
 // ShadCn
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 // Components
 import { BaseButton, FormInput, FormTextarea } from "@/app/components";
@@ -165,6 +179,34 @@ const SingleItem = ({
                         label="Airlines"
                         placeholder="Enter airline name"
                         vertical
+                    />
+
+                    <FormField
+                        control={control}
+                        name={`${name}[${index}].serviceType` as any}
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                                <FormLabel>Service Type</FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    value={field.value}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger className="w-[12rem]">
+                                            <SelectValue placeholder="Select service type" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="Economy class">Economy class</SelectItem>
+                                        <SelectItem value="Business class">Business class</SelectItem>
+                                        <SelectItem value="Premium economy class">Premium economy class</SelectItem>
+                                        <SelectItem value="First class">First class</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
 
                     <FormInput
