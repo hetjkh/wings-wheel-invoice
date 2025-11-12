@@ -49,11 +49,6 @@ const SingleItem = ({
     const { _t } = useTranslationContext();
 
     // Items
-    const itemName = useWatch({
-        name: `${name}[${index}].name`,
-        control,
-    });
-
     const rate = useWatch({
         name: `${name}[${index}].unitPrice`,
         control,
@@ -82,12 +77,13 @@ const SingleItem = ({
     });
 
     useEffect(() => {
-        // Calculate total when rate or quantity changes
-        if (rate != undefined && quantity != undefined) {
-            const calculatedTotal = (rate * quantity).toFixed(2);
+        // Calculate total when rate changes (quantity is always 1 for passengers)
+        if (rate != undefined) {
+            const calculatedTotal = (rate * 1).toFixed(2);
             setValue(`${name}[${index}].total`, calculatedTotal);
+            setValue(`${name}[${index}].quantity`, 1);
         }
-    }, [rate, quantity]);
+    }, [rate, setValue, name, index]);
 
     // DnD
     const {
@@ -120,13 +116,9 @@ const SingleItem = ({
         >
             {/* {isDragging && <div className="bg-blue-600 h-1 rounded-full"></div>} */}
             <div className="flex flex-wrap justify-between">
-                {itemName != "" ? (
-                    <p className="font-medium">
-                        #{index + 1} - {itemName}
-                    </p>
-                ) : (
-                    <p className="font-medium">#{index + 1} - Empty name</p>
-                )}
+                <p className="font-medium">
+                    Person {index + 1}
+                </p>
 
                 <div className="flex gap-3">
                     {/* Drag and Drop Button */}
@@ -159,54 +151,52 @@ const SingleItem = ({
                     </BaseButton>
                 </div>
             </div>
-            <div
-                className="flex flex-wrap justify-between gap-y-5 gap-x-2"
-                key={index}
-            >
-                <FormInput
-                    name={`${name}[${index}].name`}
-                    label={pdfTemplate === 3 ? "Airlines" : _t("form.steps.lineItems.name")}
-                    placeholder={pdfTemplate === 3 ? "Airlines" : "Item name"}
-                    vertical
-                />
-
-                <FormInput
-                    name={`${name}[${index}].quantity`}
-                    type="number"
-                    label={pdfTemplate === 3 ? "No of Passengers" : _t("form.steps.lineItems.quantity")}
-                    placeholder={pdfTemplate === 3 ? "No of Passengers" : _t("form.steps.lineItems.quantity")}
-                    className="w-[8rem]"
-                    vertical
-                />
-
-                <FormInput
-                    name={`${name}[${index}].unitPrice`}
-                    type="number"
-                    label={_t("form.steps.lineItems.rate")}
-                    labelHelper={`(${currency})`}
-                    placeholder={_t("form.steps.lineItems.rate")}
-                    className="w-[8rem]"
-                    vertical
-                />
-
-                <div className="flex flex-col gap-2">
-                    <div>
-                        <Label>{_t("form.steps.lineItems.total")}</Label>
-                    </div>
-                    <Input
-                        value={`${total} ${currency}`}
-                        readOnly
-                        placeholder="Item total"
-                        className="border-none font-medium text-lg bg-transparent"
-                        size={10}
+            <div className="space-y-4">
+                <div className="flex flex-wrap justify-between gap-y-5 gap-x-2">
+                    <FormInput
+                        name={`${name}[${index}].passengerName`}
+                        label={`Passenger Name (Person ${index + 1})`}
+                        placeholder={`Enter passenger ${index + 1} name`}
+                        vertical
                     />
+
+                    <FormInput
+                        name={`${name}[${index}].name`}
+                        label="Airlines"
+                        placeholder="Enter airline name"
+                        vertical
+                    />
+
+                    <FormInput
+                        name={`${name}[${index}].unitPrice`}
+                        type="number"
+                        label="Rate"
+                        labelHelper={`(${currency})`}
+                        placeholder="Enter rate"
+                        className="w-[8rem]"
+                        vertical
+                    />
+
+                    <div className="flex flex-col gap-2">
+                        <div>
+                            <Label>Total</Label>
+                        </div>
+                        <Input
+                            value={`${total} ${currency}`}
+                            readOnly
+                            placeholder="Item total"
+                            className="border-none font-medium text-lg bg-transparent"
+                            size={10}
+                        />
+                    </div>
                 </div>
+                
+                <FormTextarea
+                    name={`${name}[${index}].description`}
+                    label="Description"
+                    placeholder="Enter description"
+                />
             </div>
-            <FormTextarea
-                name={`${name}[${index}].description`}
-                label={_t("form.steps.lineItems.description")}
-                placeholder="Item description"
-            />
             <div>
                 {/* Not allowing deletion for first item when there is only 1 item */}
                 {fields.length > 1 && (

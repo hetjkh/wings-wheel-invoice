@@ -36,13 +36,29 @@ const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
     // Update fields when selected invoice is changed.
     // ? Reason: The fields don't go through validation when invoice loads
     const updateFields = (selected: any) => {
+        // Remove database-specific fields
+        if (selected.id) {
+            delete selected.id;
+        }
+        if (selected._id) {
+            delete selected._id;
+        }
+        if (selected.userId) {
+            delete selected.userId;
+        }
+        if (selected.createdAt) {
+            delete selected.createdAt;
+        }
+
         // Next 2 lines are so that when invoice loads,
         // the dates won't be in the wrong format
         // ? Selected cannot be of type InvoiceType because of these 2 variables
         if (selected.details.dueDate) {
             selected.details.dueDate = new Date(selected.details.dueDate);
         }
-        selected.details.invoiceDate = new Date(selected.details.invoiceDate);
+        if (selected.details.invoiceDate) {
+            selected.details.invoiceDate = new Date(selected.details.invoiceDate);
+        }
 
         // Use default logo if not present
         if (!selected.details.invoiceLogo || selected.details.invoiceLogo.trim() === "") {

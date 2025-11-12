@@ -107,14 +107,9 @@ const InvoiceTemplate = (data: InvoiceType) => {
               ) : (
                 itinerary.map((item, index) => (
                   <tr key={index} className="align-top">
-                    {index === 0 && (
-                      <td
-                        rowSpan={itinerary.length}
-                        className="border border-gray-400 px-4 py-4 font-semibold text-gray-900"
-                      >
-                        {receiver.name}
-                      </td>
-                    )}
+                    <td className="border border-gray-400 px-4 py-4 font-semibold text-gray-900">
+                      {item.passengerName || `Passenger ${index + 1}`}
+                    </td>
                     <td className="border border-gray-400 px-4 py-4 space-y-1">
                       {renderMultiline(item.description)}
                       {!item.description && (

@@ -140,6 +140,7 @@ export const FORM_DEFAULT_VALUES = {
     invoiceLogo: "https://res.cloudinary.com/dvrko1y0a/image/upload/v1762951703/wings_s8x78b.webp",
     invoiceNumber: "",
     invoiceDate: "",
+    numberOfPassengers: 1,
     items: [
       {
         name: "",
@@ -147,6 +148,7 @@ export const FORM_DEFAULT_VALUES = {
         quantity: 0,
         unitPrice: 0,
         total: 0,
+        passengerName: "",
       },
     ],
     currency: "USD",

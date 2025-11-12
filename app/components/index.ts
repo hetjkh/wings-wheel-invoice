@@ -84,6 +84,10 @@ import SignatureFontSelector from "./modals/signature/components/SignatureFontSe
 // Alerts
 import NewInvoiceAlert from "./modals/alerts/NewInvoiceAlert";
 
+// Auth
+import LoginModal from "./modals/auth/LoginModal";
+import SignupModal from "./modals/auth/SignupModal";
+
 /* =========================
    * Templates
    ========================= */
@@ -156,4 +160,6 @@ export {
     InvoiceTemplate3,
     SendPdfEmail,
     DevDebug,
+    LoginModal,
+    SignupModal,
 };

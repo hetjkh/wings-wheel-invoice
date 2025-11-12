@@ -16,6 +16,10 @@ import { useFormContext } from "react-hook-form";
 
 // Hooks
 import useToasts from "@/hooks/useToasts";
+import { useAuth } from "@/contexts/AuthContext";
+
+// ShadCn
+import { toast } from "@/components/ui/use-toast";
 
 // Services
 import { exportInvoice } from "@/services/invoice/client/exportInvoice";
@@ -69,6 +73,7 @@ export const InvoiceContextProvider = ({
   children,
 }: InvoiceContextProviderProps) => {
   const router = useRouter();
+  const { user } = useAuth();
 
   // Toasts
   const {
@@ -92,17 +97,37 @@ export const InvoiceContextProvider = ({
   // Saved invoices
   const [savedInvoices, setSavedInvoices] = useState<InvoiceType[]>([]);
 
+  // Load invoices from database or localStorage
   useEffect(() => {
-    let savedInvoicesDefault;
-    if (typeof window !== undefined) {
-      // Saved invoices variables
-      const savedInvoicesJSON = window.localStorage.getItem("savedInvoices");
-      savedInvoicesDefault = savedInvoicesJSON
-        ? JSON.parse(savedInvoicesJSON)
-        : [];
-      setSavedInvoices(savedInvoicesDefault);
-    }
-  }, []);
+    const loadInvoices = async () => {
+      if (user) {
+        // Load from database
+        try {
+          const response = await fetch("/api/invoice/list");
+          if (response.ok) {
+            const data = await response.json();
+            setSavedInvoices(data.invoices || []);
+          } else {
+            setSavedInvoices([]);
+          }
+        } catch (error) {
+          console.error("Error loading invoices:", error);
+          setSavedInvoices([]);
+        }
+      } else {
+        // Load from localStorage
+        if (typeof window !== "undefined") {
+          const savedInvoicesJSON = window.localStorage.getItem("savedInvoices");
+          const savedInvoicesDefault = savedInvoicesJSON
+            ? JSON.parse(savedInvoicesJSON)
+            : [];
+          setSavedInvoices(savedInvoicesDefault);
+        }
+      }
+    };
+
+    loadInvoices();
+  }, [user]);
 
   // Persist full form state with debounce
   useEffect(() => {
@@ -268,70 +293,147 @@ export const InvoiceContextProvider = ({
 
   // TODO: Change function name. (saveInvoiceData maybe?)
   /**
-   * Saves the invoice data to local storage.
+   * Saves the invoice data to database (if logged in) or local storage.
    */
-  const saveInvoice = () => {
+  const saveInvoice = async () => {
     if (invoicePdf) {
       // If get values function is provided, allow to save the invoice
       if (getValues) {
-        // Retrieve the existing array from local storage or initialize an empty array
-        const savedInvoicesJSON = localStorage.getItem("savedInvoices");
-        const savedInvoices = savedInvoicesJSON
-          ? JSON.parse(savedInvoicesJSON)
-          : [];
-
+        const formValues = getValues();
         const updatedDate = new Date().toLocaleDateString(
           "en-US",
           SHORT_DATE_OPTIONS
         );
-
-        const formValues = getValues();
         formValues.details.updatedAt = updatedDate;
 
-        const existingInvoiceIndex = savedInvoices.findIndex(
-          (invoice: InvoiceType) => {
-            return (
-              invoice.details.invoiceNumber === formValues.details.invoiceNumber
-            );
+        if (user) {
+          // Save to database
+          try {
+            const response = await fetch("/api/invoice/save", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formValues),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              
+              // Check if invoice already existed
+              const existingInvoiceIndex = savedInvoices.findIndex(
+                (invoice: InvoiceType) => {
+                  return (
+                    invoice.details.invoiceNumber === formValues.details.invoiceNumber
+                  );
+                }
+              );
+
+              if (existingInvoiceIndex !== -1) {
+                // Update in local state
+                const updated = [...savedInvoices];
+                updated[existingInvoiceIndex] = formValues;
+                setSavedInvoices(updated);
+                modifiedInvoiceSuccess();
+              } else {
+                // Add to local state
+                setSavedInvoices([...savedInvoices, formValues]);
+                saveInvoiceSuccess();
+              }
+            } else {
+              const error = await response.json();
+              console.error("Save error:", error);
+              toast({
+                variant: "destructive",
+                title: "Save failed",
+                description: error.error || "Could not save invoice",
+              });
+            }
+          } catch (error) {
+            console.error("Save error:", error);
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Failed to save invoice. Please try again.",
+            });
           }
-        );
-
-        // If invoice already exists
-        if (existingInvoiceIndex !== -1) {
-          savedInvoices[existingInvoiceIndex] = formValues;
-
-          // Toast
-          modifiedInvoiceSuccess();
         } else {
-          // Add the form values to the array
-          savedInvoices.push(formValues);
+          // Save to localStorage
+          const savedInvoicesJSON = localStorage.getItem("savedInvoices");
+          const savedInvoices = savedInvoicesJSON
+            ? JSON.parse(savedInvoicesJSON)
+            : [];
 
-          // Toast
-          saveInvoiceSuccess();
+          const existingInvoiceIndex = savedInvoices.findIndex(
+            (invoice: InvoiceType) => {
+              return (
+                invoice.details.invoiceNumber === formValues.details.invoiceNumber
+              );
+            }
+          );
+
+          // If invoice already exists
+          if (existingInvoiceIndex !== -1) {
+            savedInvoices[existingInvoiceIndex] = formValues;
+            modifiedInvoiceSuccess();
+          } else {
+            // Add the form values to the array
+            savedInvoices.push(formValues);
+            saveInvoiceSuccess();
+          }
+
+          localStorage.setItem("savedInvoices", JSON.stringify(savedInvoices));
+          setSavedInvoices(savedInvoices);
         }
-
-        localStorage.setItem("savedInvoices", JSON.stringify(savedInvoices));
-
-        setSavedInvoices(savedInvoices);
       }
     }
   };
 
   // TODO: Change function name. (deleteInvoiceData maybe?)
   /**
-   * Delete an invoice from local storage based on the given index.
+   * Delete an invoice from database (if logged in) or local storage.
    *
    * @param {number} index - The index of the invoice to be deleted.
    */
-  const deleteInvoice = (index: number) => {
+  const deleteInvoice = async (index: number) => {
     if (index >= 0 && index < savedInvoices.length) {
-      const updatedInvoices = [...savedInvoices];
-      updatedInvoices.splice(index, 1);
-      setSavedInvoices(updatedInvoices);
+      const invoice = savedInvoices[index];
+      
+      if (user && (invoice as any).id) {
+        // Delete from database
+        try {
+          const response = await fetch(`/api/invoice/${(invoice as any).id}`, {
+            method: "DELETE",
+          });
 
-      const updatedInvoicesJSON = JSON.stringify(updatedInvoices);
+          if (response.ok) {
+            // Remove from local state
+            const updatedInvoices = [...savedInvoices];
+            updatedInvoices.splice(index, 1);
+            setSavedInvoices(updatedInvoices);
+          } else {
+            const error = await response.json();
+            toast({
+              variant: "destructive",
+              title: "Delete failed",
+              description: error.error || "Could not delete invoice",
+            });
+          }
+        } catch (error) {
+          console.error("Delete error:", error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to delete invoice. Please try again.",
+          });
+        }
+      } else {
+        // Delete from localStorage
+        const updatedInvoices = [...savedInvoices];
+        updatedInvoices.splice(index, 1);
+        setSavedInvoices(updatedInvoices);
 
-      localStorage.setItem("savedInvoices", updatedInvoicesJSON);
+        const updatedInvoicesJSON = JSON.stringify(updatedInvoices);
+        localStorage.setItem("savedInvoices", updatedInvoicesJSON);
+      }
     }
   };
 

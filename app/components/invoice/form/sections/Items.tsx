@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 
 // RHF
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 // DnD
 import {
@@ -23,7 +23,7 @@ import {
 } from "@dnd-kit/sortable";
 
 // Components
-import { BaseButton, SingleItem, Subheading } from "@/app/components";
+import { BaseButton, SingleItem, Subheading, FormInput } from "@/app/components";
 
 // Contexts
 import { useTranslationContext } from "@/contexts/TranslationContext";
@@ -45,6 +45,59 @@ const Items = () => {
         name: ITEMS_NAME,
     });
 
+    // Watch number of passengers
+    const numberOfPassengers = useWatch({
+        control,
+        name: "details.numberOfPassengers",
+    });
+
+    // Ref to track if we're updating to prevent infinite loops
+    const isUpdatingRef = useRef(false);
+    const lastPassengerCountRef = useRef<number | undefined>(undefined);
+
+    // Generate passenger items based on number of passengers
+    useEffect(() => {
+        // Skip if already updating or if value hasn't changed
+        if (isUpdatingRef.current || lastPassengerCountRef.current === numberOfPassengers) {
+            return;
+        }
+
+        if (numberOfPassengers && numberOfPassengers > 0) {
+            isUpdatingRef.current = true;
+            const currentCount = fields.length;
+            
+            if (numberOfPassengers > currentCount) {
+                // Add new passenger items
+                const itemsToAdd = numberOfPassengers - currentCount;
+                for (let i = 0; i < itemsToAdd; i++) {
+                    append({
+                        name: "",
+                        description: "",
+                        quantity: 1,
+                        unitPrice: 0,
+                        total: 0,
+                        passengerName: "",
+                    });
+                }
+            } else if (numberOfPassengers < currentCount && currentCount > 0) {
+                // Remove excess items (keep at least 1)
+                const itemsToRemove = currentCount - numberOfPassengers;
+                for (let i = 0; i < itemsToRemove; i++) {
+                    const indexToRemove = currentCount - 1 - i;
+                    if (indexToRemove >= 0 && indexToRemove < fields.length) {
+                        remove(indexToRemove);
+                    }
+                }
+            }
+            
+            lastPassengerCountRef.current = numberOfPassengers;
+            // Reset flag after a short delay to allow state to update
+            setTimeout(() => {
+                isUpdatingRef.current = false;
+            }, 100);
+        }
+    }, [numberOfPassengers, fields.length, append, remove]);
+
     const addNewField = () => {
         append({
             name: "",
@@ -52,6 +105,7 @@ const Items = () => {
             quantity: 0,
             unitPrice: 0,
             total: 0,
+            passengerName: "",
         });
     };
 
@@ -97,6 +151,19 @@ const Items = () => {
     return (
         <section className="flex flex-col gap-2 w-full">
             <Subheading>{_t("form.steps.lineItems.heading")}:</Subheading>
+            
+            {/* Number of Passengers Input */}
+            <div className="mb-4">
+                <FormInput
+                    name="details.numberOfPassengers"
+                    type="number"
+                    label="Number of Passengers"
+                    placeholder="Enter number of passengers"
+                    className="w-48"
+                    vertical
+                />
+            </div>
+
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
@@ -134,13 +201,6 @@ const Items = () => {
                     </div>
                 </DragOverlay> */}
             </DndContext>
-            <BaseButton
-                tooltipLabel="Add a new item to the list"
-                onClick={addNewField}
-            >
-                <Plus />
-                {_t("form.steps.lineItems.addNewItem")}
-            </BaseButton>
         </section>
     );
 };

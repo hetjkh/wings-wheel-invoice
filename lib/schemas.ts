@@ -110,6 +110,7 @@ const ItemSchema = z.object({
     quantity: fieldValidators.quantity,
     unitPrice: fieldValidators.unitPrice,
     total: fieldValidators.stringToNumber,
+    passengerName: fieldValidators.stringOptional,
 });
 
 const PaymentInformationSchema = z.object({
@@ -149,6 +150,7 @@ const InvoiceDetailsSchema = z.object({
     purchaseOrderNumber: fieldValidators.stringOptional,
     currency: fieldValidators.string,
     language: fieldValidators.string,
+    numberOfPassengers: fieldValidators.quantity.optional(),
     items: z.array(ItemSchema),
     paymentInformation: PaymentInformationSchema.optional(),
     taxDetails: TaxDetailsSchema.optional(),

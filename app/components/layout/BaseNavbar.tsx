@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo } from "react";
 
 // Next
@@ -11,12 +13,24 @@ import Logo from "@/public/assets/img/invoify-logo.svg";
 import { Card } from "@/components/ui/card";
 
 // Components
-import { DevDebug, LanguageSelector, ThemeSwitcher } from "@/app/components";
+import { DevDebug, LanguageSelector, ThemeSwitcher, LoginModal, SignupModal, BaseButton } from "@/app/components";
+
+// Contexts
+import { useAuth } from "@/contexts/AuthContext";
+
+// Icons
+import { LogOut, User } from "lucide-react";
 
 const BaseNavbar = () => {
     const devEnv = useMemo(() => {
         return process.env.NODE_ENV === "development";
     }, []);
+
+    const { user, logout } = useAuth();
+
+    const handleLogout = async () => {
+        await logout();
+    };
 
     return (
         <header className="lg:container z-[99]">
@@ -32,10 +46,40 @@ const BaseNavbar = () => {
                             style={{ height: "auto" }}
                         />
                     </Link>
-                    {/* ? DEV Only */}
-                    {devEnv && <DevDebug />}
-                    <LanguageSelector />
-                    <ThemeSwitcher />
+                    <div className="flex items-center gap-3">
+                        {/* ? DEV Only */}
+                        {devEnv && <DevDebug />}
+                        <LanguageSelector />
+                        <ThemeSwitcher />
+                        {user ? (
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-600 dark:text-gray-400">
+                                    {user.email}
+                                </span>
+                                <BaseButton
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleLogout}
+                                    tooltipLabel="Logout"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                </BaseButton>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <LoginModal>
+                                    <BaseButton variant="outline" size="sm">
+                                        Login
+                                    </BaseButton>
+                                </LoginModal>
+                                <SignupModal>
+                                    <BaseButton variant="default" size="sm">
+                                        Sign Up
+                                    </BaseButton>
+                                </SignupModal>
+                            </div>
+                        )}
+                    </div>
                 </Card>
             </nav>
         </header>

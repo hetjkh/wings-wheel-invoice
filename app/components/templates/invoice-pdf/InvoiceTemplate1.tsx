@@ -75,11 +75,12 @@ const InvoiceTemplate = (data: InvoiceType) => {
 						{details.items.map((item, index) => (
 							<React.Fragment key={index}>
 								<div className='col-span-full sm:col-span-2 border-b border-gray-300'>
-									<p className='font-medium text-gray-800'>{item.name}</p>
-									<p className='text-xs text-gray-600 whitespace-pre-line'>{item.description}</p>
+									<p className='font-semibold text-gray-900'>{item.passengerName || `Passenger ${index + 1}`}</p>
+									<p className='font-medium text-gray-800 mt-1'>{item.name || 'Airlines'}</p>
+									<p className='text-xs text-gray-600 whitespace-pre-line mt-1'>{item.description}</p>
 								</div>
 								<div className='border-b border-gray-300'>
-									<p className='text-gray-800'>{item.quantity}</p>
+									<p className='text-gray-800'>{item.quantity || 1}</p>
 								</div>
 								<div className='border-b border-gray-300'>
 									<p className='text-gray-800'>
