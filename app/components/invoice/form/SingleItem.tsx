@@ -75,6 +75,12 @@ const SingleItem = ({
         control,
     });
 
+    // Template
+    const pdfTemplate = useWatch({
+        name: `details.pdfTemplate`,
+        control,
+    });
+
     useEffect(() => {
         // Calculate total when rate or quantity changes
         if (rate != undefined && quantity != undefined) {
@@ -159,8 +165,8 @@ const SingleItem = ({
             >
                 <FormInput
                     name={`${name}[${index}].name`}
-                    label={_t("form.steps.lineItems.name")}
-                    placeholder="Item name"
+                    label={pdfTemplate === 3 ? "Airlines" : _t("form.steps.lineItems.name")}
+                    placeholder={pdfTemplate === 3 ? "Airlines" : "Item name"}
                     vertical
                 />
 
