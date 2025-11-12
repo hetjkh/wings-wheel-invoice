@@ -30,6 +30,8 @@ export const CURRENCIES_API =
  * Local storage
  */
 export const LOCAL_STORAGE_INVOICE_DRAFT_KEY = "invoify:invoiceDraft";
+export const LOCAL_STORAGE_DOWNLOAD_DIRECTORY_KEY = "invoify:downloadDirectory";
+export const LOCAL_STORAGE_SAVED_PAYMENT_INFO_KEY = "invoify:savedPaymentInfo";
 
 /**
  * Tailwind
@@ -118,19 +120,15 @@ export const SHORT_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
  */
 export const FORM_DEFAULT_VALUES = {
   sender: {
-    name: "",
-    address: "",
-    zipCode: "",
-    city: "",
-    country: "",
-    email: "",
-    phone: "",
+    name: "Wings & Wheels Travel and Tourism LLC",
+    city: "Dubai",
+    country: "United Arab Emirates",
+    email: "reservation@wwtravels.net",
+    phone: "00971 (0) 54 785 8338",
     customInputs: [],
   },
   receiver: {
     name: "",
-    address: "",
-    zipCode: "",
     city: "",
     country: "",
     email: "",
@@ -138,10 +136,9 @@ export const FORM_DEFAULT_VALUES = {
     customInputs: [],
   },
   details: {
-    invoiceLogo: "",
+    invoiceLogo: "https://res.cloudinary.com/dvrko1y0a/image/upload/v1762951703/wings_s8x78b.webp",
     invoiceNumber: "",
     invoiceDate: "",
-    dueDate: "",
     items: [
       {
         name: "",
@@ -170,6 +167,8 @@ export const FORM_DEFAULT_VALUES = {
       bankName: "",
       accountName: "",
       accountNumber: "",
+      iban: "",
+      swiftCode: "",
     },
     additionalNotes: "",
     paymentTerms: "",
@@ -185,8 +184,6 @@ export const FORM_DEFAULT_VALUES = {
 export const FORM_FILL_VALUES = {
   sender: {
     name: "John Doe",
-    address: "123 Main St",
-    zipCode: "12345",
     city: "Anytown",
     country: "USA",
     email: "johndoe@example.com",
@@ -194,8 +191,6 @@ export const FORM_FILL_VALUES = {
   },
   receiver: {
     name: "Jane Smith",
-    address: "456 Elm St",
-    zipCode: "54321",
     city: "Other Town",
     country: "Canada",
     email: "janesmith@example.com",
@@ -248,6 +243,8 @@ export const FORM_FILL_VALUES = {
       bankName: "Bank Inc.",
       accountName: "John Doe",
       accountNumber: "445566998877",
+      iban: "",
+      swiftCode: "",
     },
     additionalNotes: "Thank you for your business",
     paymentTerms: "Net 30",

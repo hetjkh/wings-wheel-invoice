@@ -39,6 +39,9 @@ const readDraftFromLocalStorage = (): InvoiceType | null => {
         parsed.details.invoiceDate = new Date(parsed.details.invoiceDate);
       if (parsed.details.dueDate)
         parsed.details.dueDate = new Date(parsed.details.dueDate);
+      else
+        // Remove dueDate if it doesn't exist
+        delete parsed.details.dueDate;
     }
     return parsed;
   } catch {
@@ -60,7 +63,19 @@ const Providers = ({ children }: ProvidersProps) => {
   useEffect(() => {
     const draft = readDraftFromLocalStorage();
     if (draft) {
-      form.reset(draft, { keepDefaultValues: false });
+      // Always use the default sender values and logo, but keep other draft data
+      const mergedDraft = {
+        ...draft,
+        sender: FORM_DEFAULT_VALUES.sender,
+        details: {
+          ...draft.details,
+          // Use default logo if draft doesn't have one or if it's empty
+          invoiceLogo: (draft.details?.invoiceLogo && draft.details.invoiceLogo.trim() !== "") 
+            ? draft.details.invoiceLogo 
+            : FORM_DEFAULT_VALUES.details.invoiceLogo,
+        },
+      };
+      form.reset(mergedDraft, { keepDefaultValues: false });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

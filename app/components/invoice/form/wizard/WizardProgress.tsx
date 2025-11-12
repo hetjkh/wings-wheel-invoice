@@ -31,7 +31,6 @@ const WizardProgress = ({ wizard }: WizardProgressProps) => {
     const step1Valid = !errors.sender && !errors.receiver;
     const step2Valid =
         !errors.details?.invoiceNumber &&
-        !errors.details?.dueDate &&
         !errors.details?.invoiceDate &&
         !errors.details?.currency;
 

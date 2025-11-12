@@ -62,9 +62,12 @@ import SendPdfToEmailModal from "./modals/email/SendPdfToEmailModal";
 // Import/Export
 import InvoiceLoaderModal from "./modals/invoice/InvoiceLoaderModal";
 import InvoiceExportModal from "./modals/invoice/InvoiceExportModal";
+import DownloadSettingsModal from "./modals/invoice/DownloadSettingsModal";
+import SavedPaymentInfoModal from "./modals/invoice/SavedPaymentInfoModal";
 
 // Custom Selectors
 import SavedInvoicesList from "./modals/invoice/components/SavedInvoicesList";
+import SavedPaymentInfoList from "./modals/invoice/components/SavedPaymentInfoList";
 
 // Signature
 import SignatureModal from "./modals/signature/SignatureModal";
@@ -119,6 +122,7 @@ export {
     InvoiceSummary,
     CurrencySelector,
     SavedInvoicesList,
+    SavedPaymentInfoList,
     PdfViewer,
     LivePreview,
     FinalPdf,
@@ -135,6 +139,8 @@ export {
     SendPdfToEmailModal,
     InvoiceLoaderModal,
     InvoiceExportModal,
+    DownloadSettingsModal,
+    SavedPaymentInfoModal,
     ImportJsonButton,
     SignatureModal,
     DrawSignature,

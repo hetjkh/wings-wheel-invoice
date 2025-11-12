@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 // RHF
 import { useFormContext, useWatch } from "react-hook-form";
@@ -40,6 +40,11 @@ const FormFile = ({ name, label, placeholder }: FormFileProps) => {
     const [base64Image, setBase64Image] = useState<string>(logoImage ?? "");
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+    // Sync state with form value changes
+    useEffect(() => {
+        setBase64Image(logoImage ?? "");
+    }, [logoImage]);
+
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files![0];
         if (file) {
@@ -70,10 +75,10 @@ const FormFile = ({ name, label, placeholder }: FormFileProps) => {
                 render={({ field }) => (
                     <FormItem>
                         <Label>{label}:</Label>
-                        {base64Image ? (
+                        {(base64Image || field.value) ? (
                             <img
                                 id="logoImage"
-                                src={base64Image}
+                                src={base64Image || field.value}
                                 style={{
                                     objectFit: "contain",
                                     width: "10rem",

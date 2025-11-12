@@ -39,7 +39,9 @@ const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
         // Next 2 lines are so that when invoice loads,
         // the dates won't be in the wrong format
         // ? Selected cannot be of type InvoiceType because of these 2 variables
-        selected.details.dueDate = new Date(selected.details.dueDate);
+        if (selected.details.dueDate) {
+            selected.details.dueDate = new Date(selected.details.dueDate);
+        }
         selected.details.invoiceDate = new Date(selected.details.invoiceDate);
 
         selected.details.invoiceLogo = "";
@@ -54,9 +56,11 @@ const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
      * @param {InvoiceType} selected - The selected invoice
      */
     const transformDates = (selected: InvoiceType) => {
-        selected.details.dueDate = new Date(
-            selected.details.dueDate
-        ).toLocaleDateString("en-US", DATE_OPTIONS);
+        if (selected.details.dueDate) {
+            selected.details.dueDate = new Date(
+                selected.details.dueDate
+            ).toLocaleDateString("en-US", DATE_OPTIONS);
+        }
         selected.details.invoiceDate = new Date(
             selected.details.invoiceDate
         ).toLocaleDateString("en-US", DATE_OPTIONS);

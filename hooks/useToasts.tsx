@@ -73,6 +73,16 @@ const useToasts = () => {
         });
     };
 
+    const downloadSuccess = (filename?: string) => {
+        toast({
+            variant: "default",
+            title: "Download successful",
+            description: filename 
+                ? `Invoice ${filename} has been downloaded successfully`
+                : "Invoice has been downloaded successfully",
+        });
+    };
+
     return {
         newInvoiceSuccess,
         pdfGenerationSuccess,
@@ -81,6 +91,7 @@ const useToasts = () => {
         sendPdfSuccess,
         sendPdfError,
         importInvoiceError,
+        downloadSuccess,
     };
 };
 

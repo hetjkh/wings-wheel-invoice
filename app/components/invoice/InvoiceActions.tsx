@@ -15,6 +15,7 @@ import {
   NewInvoiceAlert,
   InvoiceLoaderModal,
   InvoiceExportModal,
+  DownloadSettingsModal,
 } from "@/app/components";
 
 // Contexts
@@ -22,7 +23,7 @@ import { useInvoiceContext } from "@/contexts/InvoiceContext";
 import { useTranslationContext } from "@/contexts/TranslationContext";
 
 // Icons
-import { FileInput, FolderUp, Import, Plus, RotateCcw } from "lucide-react";
+import { FileInput, FolderUp, Import, Plus, RotateCcw, Settings } from "lucide-react";
 
 const InvoiceActions = () => {
   const { invoicePdfLoading, newInvoice } = useInvoiceContext();
@@ -61,6 +62,18 @@ const InvoiceActions = () => {
                 {_t("actions.exportInvoice")}
               </BaseButton>
             </InvoiceExportModal>
+
+            {/* Download settings button */}
+            <DownloadSettingsModal>
+              <BaseButton
+                variant="outline"
+                tooltipLabel="Configure download location"
+                disabled={invoicePdfLoading}
+              >
+                <Settings />
+                Download Settings
+              </BaseButton>
+            </DownloadSettingsModal>
           </div>
 
           <div className="flex flex-wrap gap-3">

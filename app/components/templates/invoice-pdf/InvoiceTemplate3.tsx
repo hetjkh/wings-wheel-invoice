@@ -31,7 +31,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
     <InvoiceLayout data={data}>
       <div className="border border-gray-300 p-6 rounded-xl space-y-6">
         {/* Header */}
-        <div className="flex flex-wrap justify-between gap-6">
+        <div className="flex flex-wrap justify-between items-start gap-6">
           <div className="max-w-xs space-y-2">
             {details.invoiceLogo && (
               <img
@@ -45,16 +45,15 @@ const InvoiceTemplate = (data: InvoiceType) => {
               {sender.name}
             </h1>
             <div className="text-sm text-gray-600 space-y-1">
-              <p>{sender.address}</p>
               <p>
-                {sender.city}, {sender.country} {sender.zipCode}
+                {sender.city}, {sender.country}
               </p>
               <p>{sender.email}</p>
               <p>{sender.phone}</p>
             </div>
           </div>
 
-          <div className="text-right space-y-2">
+          <div className="ml-auto text-right space-y-2">
             <h2 className="text-3xl font-semibold tracking-wide text-gray-900">
               Travel Invoice
             </h2>
@@ -67,15 +66,6 @@ const InvoiceTemplate = (data: InvoiceType) => {
                 <span className="font-medium text-gray-800">Issued:</span>{" "}
                 {details.invoiceDate
                   ? new Date(details.invoiceDate).toLocaleDateString(
-                      "en-US",
-                      DATE_OPTIONS
-                    )
-                  : "-"}
-              </p>
-              <p>
-                <span className="font-medium text-gray-800">Due:</span>{" "}
-                {details.dueDate
-                  ? new Date(details.dueDate).toLocaleDateString(
                       "en-US",
                       DATE_OPTIONS
                     )
@@ -160,9 +150,8 @@ const InvoiceTemplate = (data: InvoiceType) => {
                 Billed To
               </p>
               <p className="font-semibold text-gray-900">{receiver.name}</p>
-              <p>{receiver.address}</p>
               <p>
-                {receiver.city}, {receiver.country} {receiver.zipCode}
+                {receiver.city}, {receiver.country}
               </p>
               <p>{receiver.email}</p>
               <p>{receiver.phone}</p>
@@ -254,6 +243,12 @@ const InvoiceTemplate = (data: InvoiceType) => {
             <p>Bank: {details.paymentInformation.bankName}</p>
             <p>Account Name: {details.paymentInformation.accountName}</p>
             <p>Account Number: {details.paymentInformation.accountNumber}</p>
+            {details.paymentInformation.iban && (
+              <p>IBAN No: {details.paymentInformation.iban}</p>
+            )}
+            {details.paymentInformation.swiftCode && (
+              <p>SWIFT Code: {details.paymentInformation.swiftCode}</p>
+            )}
           </div>
         )}
 

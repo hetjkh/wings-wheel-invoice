@@ -173,8 +173,8 @@ const SingleItem = ({
                 <FormInput
                     name={`${name}[${index}].quantity`}
                     type="number"
-                    label={_t("form.steps.lineItems.quantity")}
-                    placeholder={_t("form.steps.lineItems.quantity")}
+                    label={pdfTemplate === 3 ? "No of Passengers" : _t("form.steps.lineItems.quantity")}
+                    placeholder={pdfTemplate === 3 ? "No of Passengers" : _t("form.steps.lineItems.quantity")}
                     className="w-[8rem]"
                     vertical
                 />

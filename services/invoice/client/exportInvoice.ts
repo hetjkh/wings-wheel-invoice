@@ -4,6 +4,12 @@ import { EXPORT_INVOICE_API } from "@/lib/variables";
 // Types
 import { ExportTypes, InvoiceType } from "@/types";
 
+// Services
+import { saveFileToDirectory } from "./downloadToDirectory";
+
+// ShadCn
+import { toast } from "@/components/ui/use-toast";
+
 /**
  * Export an invoice by sending a POST request to the server and initiating the download.
  *
@@ -24,15 +30,39 @@ export const exportInvoice = async (
         },
     })
         .then((res) => res.blob())
-        .then((blob) => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `invoice.${exportAs.toLowerCase()}`;
-            a.click();
-            window.URL.revokeObjectURL(url);
+        .then(async (blob) => {
+            // Get invoice number from form values
+            const invoiceNumber = formValues.details.invoiceNumber || "invoice";
+            // Sanitize filename (remove invalid characters)
+            const sanitizedInvoiceNumber = invoiceNumber.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+            const filename = `${sanitizedInvoiceNumber}.${exportAs.toLowerCase()}`;
+            
+            // Try to save to preferred directory first
+            const saved = await saveFileToDirectory(blob, filename);
+            
+            if (!saved) {
+                // Fallback to default browser download
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
+            
+            // Show success message
+            toast({
+                variant: "default",
+                title: "Export successful",
+                description: `Invoice ${invoiceNumber} has been exported as ${exportAs} successfully`,
+            });
         })
         .catch((error) => {
             console.error("Error downloading:", error);
+            toast({
+                variant: "destructive",
+                title: "Export failed",
+                description: "Something went wrong while exporting the invoice. Please try again.",
+            });
         });
 };

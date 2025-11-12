@@ -33,9 +33,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
 					<h2 className='text-2xl md:text-3xl font-semibold text-gray-800'>Invoice #</h2>
 					<span className='mt-1 block text-gray-500'>{details.invoiceNumber}</span>
 					<address className='mt-4 not-italic text-gray-800'>
-						{sender.address}
-						<br />
-						{sender.zipCode}, {sender.city}
+						{sender.city}
 						<br />
 						{sender.country}
 						<br />
@@ -47,11 +45,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
 				<div>
 					<h3 className='text-lg font-semibold text-gray-800'>Bill to:</h3>
 					<h3 className='text-lg font-semibold text-gray-800'>{receiver.name}</h3>
-					{}
 					<address className='mt-2 not-italic text-gray-500'>
-						{receiver.address && receiver.address.length > 0 ? receiver.address : null}
-						{receiver.zipCode && receiver.zipCode.length > 0 ? `, ${receiver.zipCode}` : null}
-						<br />
 						{receiver.city}, {receiver.country}
 						<br />
 					</address>
@@ -62,12 +56,6 @@ const InvoiceTemplate = (data: InvoiceType) => {
 							<dt className='col-span-3 font-semibold text-gray-800'>Invoice date:</dt>
 							<dd className='col-span-3 text-gray-500'>
 								{new Date(details.invoiceDate).toLocaleDateString("en-US", DATE_OPTIONS)}
-							</dd>
-						</dl>
-						<dl className='grid sm:grid-cols-6 gap-x-3'>
-							<dt className='col-span-3 font-semibold text-gray-800'>Due date:</dt>
-							<dd className='col-span-3 text-gray-500'>
-								{new Date(details.dueDate).toLocaleDateString("en-US", DATE_OPTIONS)}
 							</dd>
 						</dl>
 					</div>
@@ -186,6 +174,12 @@ const InvoiceTemplate = (data: InvoiceType) => {
 							<p className='text-sm'>Bank: {details.paymentInformation?.bankName}</p>
 							<p className='text-sm'>Account name: {details.paymentInformation?.accountName}</p>
 							<p className='text-sm'>Account no: {details.paymentInformation?.accountNumber}</p>
+							{details.paymentInformation?.iban && (
+								<p className='text-sm'>IBAN No: {details.paymentInformation.iban}</p>
+							)}
+							{details.paymentInformation?.swiftCode && (
+								<p className='text-sm'>SWIFT Code: {details.paymentInformation.swiftCode}</p>
+							)}
 						</span>
 					</div>
 				</div>

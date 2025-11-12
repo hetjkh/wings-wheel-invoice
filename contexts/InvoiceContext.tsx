@@ -19,6 +19,7 @@ import useToasts from "@/hooks/useToasts";
 
 // Services
 import { exportInvoice } from "@/services/invoice/client/exportInvoice";
+import { saveFileToDirectory } from "@/services/invoice/client/downloadToDirectory";
 
 // Variables
 import {
@@ -41,7 +42,7 @@ const defaultInvoiceContext = {
   newInvoice: () => {},
   generatePdf: async (data: InvoiceType) => {},
   removeFinalPdf: () => {},
-  downloadPdf: () => {},
+  downloadPdf: async () => {},
   printPdf: () => {},
   previewPdfInTab: () => {},
   saveInvoice: () => {},
@@ -75,6 +76,7 @@ export const InvoiceContextProvider = ({
     sendPdfSuccess,
     sendPdfError,
     importInvoiceError,
+    downloadSuccess,
   } = useToasts();
 
   // Get form values and methods from form context
@@ -204,23 +206,33 @@ export const InvoiceContextProvider = ({
   /**
    * Downloads a PDF file.
    */
-  const downloadPdf = () => {
+  const downloadPdf = async () => {
     // Only download if there is an invoice
     if (invoicePdf instanceof Blob && invoicePdf.size > 0) {
-      // Create a blob URL to trigger the download
-      const url = window.URL.createObjectURL(invoicePdf);
-
-      // Create an anchor element to initiate the download
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "invoice.pdf";
-      document.body.appendChild(a);
-
-      // Trigger the download
-      a.click();
-
-      // Clean up the URL object
-      window.URL.revokeObjectURL(url);
+      // Get invoice number from form values
+      const formValues = getValues();
+      const invoiceNumber = formValues.details.invoiceNumber || "invoice";
+      // Sanitize filename (remove invalid characters)
+      const sanitizedInvoiceNumber = invoiceNumber.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+      const filename = `${sanitizedInvoiceNumber}.pdf`;
+      
+      // Try to save to preferred directory first
+      const saved = await saveFileToDirectory(invoicePdf, filename);
+      
+      if (!saved) {
+        // Fallback to default browser download
+        const url = window.URL.createObjectURL(invoicePdf);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+      
+      // Show success message
+      downloadSuccess(invoiceNumber || undefined);
     }
   };
 
@@ -377,6 +389,9 @@ export const InvoiceContextProvider = ({
             importedData.details.dueDate = new Date(
               importedData.details.dueDate
             );
+          } else {
+            // Remove dueDate if it doesn't exist
+            delete importedData.details.dueDate;
           }
         }
 

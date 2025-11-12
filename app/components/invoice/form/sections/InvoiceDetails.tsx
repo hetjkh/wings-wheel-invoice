@@ -43,11 +43,6 @@ const InvoiceDetails = () => {
                         label={_t("form.steps.invoiceDetails.issuedDate")}
                     />
 
-                    <DatePickerFormField
-                        name="details.dueDate"
-                        label={_t("form.steps.invoiceDetails.dueDate")}
-                    />
-
                     <CurrencySelector
                         name="details.currency"
                         label={_t("form.steps.invoiceDetails.currency")}

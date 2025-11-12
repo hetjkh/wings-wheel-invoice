@@ -88,8 +88,6 @@ const CustomInputSchema = z.object({
 
 const InvoiceSenderSchema = z.object({
     name: fieldValidators.name,
-    address: fieldValidators.address,
-    zipCode: fieldValidators.zipCode,
     city: fieldValidators.city,
     country: fieldValidators.country,
     email: fieldValidators.email,
@@ -99,8 +97,6 @@ const InvoiceSenderSchema = z.object({
 
 const InvoiceReceiverSchema = z.object({
     name: fieldValidators.name,
-    address: fieldValidators.address,
-    zipCode: fieldValidators.zipCode,
     city: fieldValidators.city,
     country: fieldValidators.country,
     email: fieldValidators.email,
@@ -120,6 +116,8 @@ const PaymentInformationSchema = z.object({
     bankName: fieldValidators.stringMin1,
     accountName: fieldValidators.stringMin1,
     accountNumber: fieldValidators.stringMin1,
+    iban: fieldValidators.stringOptional,
+    swiftCode: fieldValidators.stringOptional,
 });
 
 const DiscountDetailsSchema = z.object({
@@ -147,7 +145,7 @@ const InvoiceDetailsSchema = z.object({
     invoiceLogo: fieldValidators.stringOptional,
     invoiceNumber: fieldValidators.stringMin1,
     invoiceDate: fieldValidators.date,
-    dueDate: fieldValidators.date,
+    dueDate: fieldValidators.date.optional(),
     purchaseOrderNumber: fieldValidators.stringOptional,
     currency: fieldValidators.string,
     language: fieldValidators.string,
