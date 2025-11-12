@@ -73,6 +73,10 @@ const Providers = ({ children }: ProvidersProps) => {
           invoiceLogo: (draft.details?.invoiceLogo && draft.details.invoiceLogo.trim() !== "") 
             ? draft.details.invoiceLogo 
             : FORM_DEFAULT_VALUES.details.invoiceLogo,
+          // Use default signature if draft doesn't have one or if it's empty
+          signature: (draft.details?.signature?.data && draft.details.signature.data.trim() !== "") 
+            ? draft.details.signature 
+            : FORM_DEFAULT_VALUES.details.signature,
         },
       };
       form.reset(mergedDraft, { keepDefaultValues: false });

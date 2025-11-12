@@ -31,7 +31,7 @@ import { useSignatureContext } from "@/contexts/SignatureContext";
 import { FileSignature } from "lucide-react";
 
 // Helpers
-import { isDataUrl } from "@/lib/helpers";
+import { isDataUrl, isImageUrl } from "@/lib/helpers";
 
 // Types
 import { SignatureTabs } from "@/types";
@@ -128,7 +128,7 @@ const SignatureModal = ({}: SignatureModalProps) => {
                             {_t("form.steps.summary.signature.heading")}
                         </Label>
 
-                        {signature && isDataUrl(signature) ? (
+                        {signature && isImageUrl(signature) ? (
                             <img
                                 className="border border-black rounded-md hover:border-blue-500 bg-white"
                                 src={signature}

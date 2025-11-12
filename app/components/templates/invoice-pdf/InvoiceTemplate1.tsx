@@ -4,7 +4,7 @@ import React from "react";
 import { InvoiceLayout } from "@/app/components";
 
 // Helpers
-import { formatNumberWithCommas, isDataUrl } from "@/lib/helpers";
+import { formatNumberWithCommas, isDataUrl, isImageUrl } from "@/lib/helpers";
 
 // Variables
 import { DATE_OPTIONS } from "@/lib/variables";
@@ -193,7 +193,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
 			</div>
 
 			{/* Signature */}
-			{details?.signature?.data && isDataUrl(details?.signature?.data) ? (
+			{details?.signature?.data && isImageUrl(details?.signature?.data) ? (
 				<div className='mt-6'>
 					<p className='font-semibold text-gray-800'>Signature:</p>
 					<img

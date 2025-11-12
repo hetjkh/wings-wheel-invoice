@@ -4,7 +4,7 @@ import React from "react";
 import { InvoiceLayout } from "@/app/components";
 
 // Helpers
-import { formatNumberWithCommas, isDataUrl } from "@/lib/helpers";
+import { formatNumberWithCommas, isDataUrl, isImageUrl } from "@/lib/helpers";
 import { DATE_OPTIONS } from "@/lib/variables";
 
 // Types
@@ -258,7 +258,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
             <p className="text-sm font-semibold text-gray-700 uppercase tracking-widest">
               Authorized Signature
             </p>
-            {isDataUrl(details.signature.data) ? (
+            {isImageUrl(details.signature.data) ? (
               <img
                 src={details.signature.data}
                 width={140}

@@ -164,6 +164,26 @@ const isValidEmail = (email: string) => {
 const isDataUrl = (str: string) => str.startsWith("data:");
 
 /**
+ * A method to check if a string is an image URL (data URL or HTTP/HTTPS URL)
+ *
+ * @param {string} str - String to check
+ * @returns {boolean} Boolean indicating if the string is an image URL
+ */
+const isImageUrl = (str: string) => {
+    if (!str) return false;
+    // Check if it's a data URL
+    if (str.startsWith("data:")) return true;
+    // Check if it's an HTTP/HTTPS URL (likely an image)
+    if (str.startsWith("http://") || str.startsWith("https://")) {
+        // Check for common image extensions
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
+        const lowerStr = str.toLowerCase();
+        return imageExtensions.some(ext => lowerStr.includes(ext));
+    }
+    return false;
+};
+
+/**
  * Dynamically imports and retrieves an invoice template React component based on the provided template ID.
  *
  * @param {number} templateId - The ID of the invoice template.
@@ -208,6 +228,7 @@ export {
     flattenObject,
     isValidEmail,
     isDataUrl,
+    isImageUrl,
     getInvoiceTemplate,
     fileToBuffer,
 };

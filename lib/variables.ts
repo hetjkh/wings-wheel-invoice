@@ -174,6 +174,9 @@ export const FORM_DEFAULT_VALUES = {
     paymentTerms: "",
     totalAmountInWords: "",
     pdfTemplate: 1,
+    signature: {
+      data: "https://res.cloudinary.com/dvrko1y0a/image/upload/v1762962336/7379e2cf-8c90-4e2f-a2b0-4ddbacbd65dd_ad36bo.jpg",
+    },
   },
 };
 

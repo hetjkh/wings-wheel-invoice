@@ -18,7 +18,7 @@ import { useInvoiceContext } from "@/contexts/InvoiceContext";
 import { formatNumberWithCommas } from "@/lib/helpers";
 
 // Variables
-import { DATE_OPTIONS } from "@/lib/variables";
+import { DATE_OPTIONS, FORM_DEFAULT_VALUES } from "@/lib/variables";
 
 // Types
 import { InvoiceType } from "@/types";
@@ -44,10 +44,14 @@ const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
         }
         selected.details.invoiceDate = new Date(selected.details.invoiceDate);
 
-        selected.details.invoiceLogo = "";
-        selected.details.signature = {
-            data: "",
-        };
+        // Use default logo if not present
+        if (!selected.details.invoiceLogo || selected.details.invoiceLogo.trim() === "") {
+            selected.details.invoiceLogo = FORM_DEFAULT_VALUES.details.invoiceLogo;
+        }
+        // Use default signature if not present
+        if (!selected.details.signature?.data || selected.details.signature.data.trim() === "") {
+            selected.details.signature = FORM_DEFAULT_VALUES.details.signature;
+        }
     };
 
     /**
