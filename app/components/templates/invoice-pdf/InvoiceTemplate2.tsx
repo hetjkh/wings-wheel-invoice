@@ -72,6 +72,16 @@ const InvoiceTemplate2 = (data: InvoiceType) => {
                                 ).toLocaleDateString("en-US", DATE_OPTIONS)}
                             </dd>
                         </dl>
+                        {details.numberOfPassengers && (
+                            <dl className="grid sm:grid-cols-6 gap-x-3">
+                                <dt className="col-span-3 font-semibold text-gray-800">
+                                    Total Passengers:
+                                </dt>
+                                <dd className="col-span-3 text-gray-500">
+                                    {details.numberOfPassengers}
+                                </dd>
+                            </dl>
+                        )}
                     </div>
                 </div>
             </div>

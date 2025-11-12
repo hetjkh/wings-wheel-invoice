@@ -71,6 +71,12 @@ const InvoiceTemplate = (data: InvoiceType) => {
                     )
                   : "-"}
               </p>
+              {details.numberOfPassengers && (
+                <p>
+                  <span className="font-medium text-gray-800">Total Passengers:</span>{" "}
+                  {details.numberOfPassengers}
+                </p>
+              )}
             </div>
           </div>
         </div>
