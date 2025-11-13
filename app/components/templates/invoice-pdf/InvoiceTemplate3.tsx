@@ -21,7 +21,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
       .split(/\r?\n/)
       .filter((line) => line.trim().length > 0)
       .map((line, index) => (
-        <p key={`${line}-${index}`} className="leading-tight">
+        <p key={`${line}-${index}`} className="leading-tight whitespace-nowrap">
           {line}
         </p>
       ));
@@ -36,8 +36,8 @@ const InvoiceTemplate = (data: InvoiceType) => {
             {details.invoiceLogo && (
               <img
                 src={details.invoiceLogo}
-                width={160}
-                height={90}
+                width={120}
+                height={68}
                 alt={`Logo of ${sender.name}`}
               />
             )}
@@ -53,28 +53,30 @@ const InvoiceTemplate = (data: InvoiceType) => {
             </div>
           </div>
 
-          <div className="ml-auto text-right space-y-2">
+          <div className="ml-auto text-right space-y-3">
             <h2 className="text-3xl font-semibold tracking-wide text-gray-900">
               Travel Invoice
             </h2>
-            <div className="text-sm text-gray-600 space-y-1">
-              <p>
-                <span className="font-medium text-gray-800">Invoice #:</span>{" "}
-                {details.invoiceNumber}
+            <div className="space-y-2.5">
+              <p className="text-base">
+                <span className="font-bold text-gray-900">Invoice #:</span>{" "}
+                <span className="font-bold text-gray-900 text-lg">{details.invoiceNumber}</span>
               </p>
-              <p>
-                <span className="font-medium text-gray-800">Issued:</span>{" "}
-                {details.invoiceDate
-                  ? new Date(details.invoiceDate).toLocaleDateString(
-                      "en-US",
-                      DATE_OPTIONS
-                    )
-                  : "-"}
+              <p className="text-base">
+                <span className="font-bold text-gray-900">Issued:</span>{" "}
+                <span className="font-semibold text-gray-800">
+                  {details.invoiceDate
+                    ? new Date(details.invoiceDate).toLocaleDateString(
+                        "en-US",
+                        DATE_OPTIONS
+                      )
+                    : "-"}
+                </span>
               </p>
               {details.numberOfPassengers && (
-                <p>
-                  <span className="font-medium text-gray-800">Total Passengers:</span>{" "}
-                  {details.numberOfPassengers}
+                <p className="text-base">
+                  <span className="font-bold text-gray-900">Total Passengers:</span>{" "}
+                  <span className="font-bold text-gray-900 text-lg">{details.numberOfPassengers}</span>
                 </p>
               )}
             </div>
@@ -83,16 +85,16 @@ const InvoiceTemplate = (data: InvoiceType) => {
 
         {/* Billed To - Right Side */}
         <div className="flex justify-end">
-          <div className="text-right space-y-2 text-sm text-gray-700">
-            <p className="uppercase text-xs font-semibold tracking-widest text-gray-500">
+          <div className="text-right space-y-2.5 min-w-[280px]">
+            <p className="uppercase text-sm font-bold tracking-widest text-gray-900 border-b border-gray-400 pb-2">
               Billed To
             </p>
-            <p className="font-semibold text-gray-900">{receiver.name}</p>
-            <p>
+            <p className="font-bold text-base text-gray-900">{receiver.name}</p>
+            <p className="text-sm font-medium text-gray-800">
               {receiver.city}, {receiver.country}
             </p>
-            <p>{receiver.email}</p>
-            <p>{receiver.phone}</p>
+            <p className="text-sm font-medium text-gray-800">{receiver.email}</p>
+            <p className="text-sm font-medium text-gray-800">{receiver.phone}</p>
           </div>
         </div>
 
@@ -104,16 +106,16 @@ const InvoiceTemplate = (data: InvoiceType) => {
                 <th className="border border-gray-400 px-4 py-3 text-left w-44">
                   Passenger Name
                 </th>
-                <th className="border border-gray-400 px-4 py-3 text-left">
-                  Routine &amp; Dates of Travel
+                <th className="border border-gray-400 px-4 py-3 text-left w-72">
+                  Route
                 </th>
-                <th className="border border-gray-400 px-4 py-3 text-left w-48">
+                <th className="border border-gray-400 px-4 py-3 text-left w-36">
                   Airlines
                 </th>
-                <th className="border border-gray-400 px-4 py-3 text-left w-40">
+                <th className="border border-gray-400 px-4 py-3 text-left w-32">
                   Service Type
                 </th>
-                <th className="border border-gray-400 px-4 py-3 text-right w-44">
+                <th className="border border-gray-400 px-4 py-3 text-right w-32">
                   Amount
                 </th>
               </tr>

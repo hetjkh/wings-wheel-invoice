@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 
 // RHF
 import { useFormContext } from "react-hook-form";
 
 // ShadCn
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 // Components
 import { BaseButton } from "@/app/components";
@@ -29,6 +30,7 @@ type SavedInvoicesListProps = {
 
 const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
     const { savedInvoices, onFormSubmit, deleteInvoice } = useInvoiceContext();
+    const [searchQuery, setSearchQuery] = useState("");
 
     const { reset } = useFormContext<InvoiceType>();
 
@@ -114,10 +116,41 @@ const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
         onFormSubmit(selectedInvoice);
     };
 
+    // Filter invoices based on search query
+    const filteredInvoices = useMemo(() => {
+        if (!searchQuery.trim()) {
+            return savedInvoices.map((invoice, idx) => ({ invoice, originalIdx: idx }));
+        }
+
+        const query = searchQuery.toLowerCase().trim();
+        return savedInvoices
+            .map((invoice, idx) => ({ invoice, originalIdx: idx }))
+            .filter(({ invoice }) => {
+                const invoiceNumber = invoice.details.invoiceNumber?.toLowerCase() || "";
+                const senderName = invoice.sender.name?.toLowerCase() || "";
+                const receiverName = invoice.receiver.name?.toLowerCase() || "";
+                
+                return (
+                    invoiceNumber.includes(query) ||
+                    senderName.includes(query) ||
+                    receiverName.includes(query)
+                );
+            });
+    }, [savedInvoices, searchQuery]);
+
     return (
         <>
+            <div className="mb-4">
+                <Input
+                    type="text"
+                    placeholder="Search by invoice number, sender name, or receiver name..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full"
+                />
+            </div>
             <div className="flex flex-col gap-5 overflow-y-auto max-h-72">
-                {savedInvoices.map((invoice, idx) => (
+                {filteredInvoices.map(({ invoice, originalIdx }, idx) => (
                     <Card
                         key={idx}
                         className="p-2 border rounded-sm hover:border-blue-500 hover:shadow-lg cursor-pointer"
@@ -174,7 +207,7 @@ const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
                                     size="sm"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        deleteInvoice(idx);
+                                        deleteInvoice(originalIdx);
                                     }}
                                 >
                                     Delete
@@ -184,9 +217,15 @@ const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
                     </Card>
                 ))}
 
-                {savedInvoices.length == 0 && (
+                {savedInvoices.length === 0 && (
                     <div>
                         <p>No saved invoices</p>
+                    </div>
+                )}
+
+                {savedInvoices.length > 0 && filteredInvoices.length === 0 && (
+                    <div>
+                        <p>No invoices found matching your search</p>
                     </div>
                 )}
             </div>
