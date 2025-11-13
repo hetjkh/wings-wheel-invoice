@@ -167,8 +167,8 @@ const InvoiceTemplate = (data: InvoiceType) => {
         </div>
 
         {/* Totals */}
-        <div className="grid md:grid-cols-2 gap-6 items-start">
-          <div className="space-y-4 text-sm text-gray-700">
+        <div className="grid md:grid-cols-2 gap-4 items-start">
+          <div className="space-y-3 text-sm text-gray-700">
             {details.additionalNotes && (
               <div>
                 <p className="uppercase text-xs font-semibold tracking-widest text-gray-500">
@@ -187,7 +187,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
             )}
           </div>
 
-          <div className="border border-gray-300 rounded-lg p-4 space-y-3 bg-gray-50">
+          <div className="border border-gray-300 rounded-lg p-3 space-y-2 bg-gray-50">
             <div className="flex justify-between text-sm text-gray-700">
               <span className="font-semibold">Subtotal</span>
               <span>
@@ -247,51 +247,54 @@ const InvoiceTemplate = (data: InvoiceType) => {
           </div>
         </div>
 
-        {/* Payment details */}
-        {details.paymentInformation && (
-          <div className="rounded-lg border border-gray-300 p-4 text-sm text-gray-700">
-            <p className="uppercase text-xs font-semibold tracking-widest text-gray-500">
-              Payment Instructions
-            </p>
-            <p>Bank: {details.paymentInformation.bankName}</p>
-            <p>Account Name: {details.paymentInformation.accountName}</p>
-            <p>Account Number: {details.paymentInformation.accountNumber}</p>
-            {details.paymentInformation.iban && (
-              <p>IBAN No: {details.paymentInformation.iban}</p>
-            )}
-            {details.paymentInformation.swiftCode && (
-              <p>SWIFT Code: {details.paymentInformation.swiftCode}</p>
-            )}
-          </div>
-        )}
-
-        {/* Signature */}
-        {details.signature?.data ? (
-          <div className="pt-6">
-            <p className="text-sm font-semibold text-gray-700 uppercase tracking-widest">
-              Authorized Signature
-            </p>
-            {isImageUrl(details.signature.data) ? (
-              <img
-                src={details.signature.data}
-                width={140}
-                height={70}
-                alt={`Signature of ${sender.name}`}
-              />
-            ) : (
-              <p
-                style={{
-                  fontSize: 28,
-                  fontWeight: 400,
-                  fontFamily: `${details.signature.fontFamily}, cursive`,
-                }}
-              >
-                {details.signature.data}
+        {/* Payment details and Signature */}
+        <div className="flex flex-wrap justify-between items-start mt-4 gap-8" style={{ pageBreakInside: 'avoid' }}>
+          {details.paymentInformation && (
+            <div className="rounded-lg border border-gray-300 p-2 text-sm text-gray-700 max-w-md">
+              <p className="uppercase text-xs font-semibold tracking-widest text-gray-500 mb-1">
+                Payment Instructions
               </p>
-            )}
-            <p className="text-sm text-gray-600 mt-2">{sender.name}</p>
-          </div>
-        ) : null}
+              <p className="mb-0.5">Bank: {details.paymentInformation.bankName}</p>
+              <p className="mb-0.5">Account Name: {details.paymentInformation.accountName}</p>
+              <p className="mb-0.5">Account Number: {details.paymentInformation.accountNumber}</p>
+              {details.paymentInformation.iban && (
+                <p className="mb-0.5">IBAN No: {details.paymentInformation.iban}</p>
+              )}
+              {details.paymentInformation.swiftCode && (
+                <p className="mb-0.5">SWIFT Code: {details.paymentInformation.swiftCode}</p>
+              )}
+            </div>
+          )}
+
+          {/* Signature */}
+          {details.signature?.data ? (
+            <div className="ml-auto">
+              <p className="text-sm font-semibold text-gray-700 uppercase tracking-widest mb-1">
+                Authorized Signature
+              </p>
+              {isImageUrl(details.signature.data) ? (
+                <img
+                  src={details.signature.data}
+                  width={120}
+                  height={60}
+                  alt={`Signature of ${sender.name}`}
+                />
+              ) : (
+                <p
+                  style={{
+                    fontSize: 24,
+                    fontWeight: 400,
+                    fontFamily: `${details.signature.fontFamily}, cursive`,
+                    margin: 0,
+                  }}
+                >
+                  {details.signature.data}
+                </p>
+              )}
+              <p className="text-sm text-gray-600 mt-1">{sender.name}</p>
+            </div>
+          ) : null}
+        </div>
       </div>
     </InvoiceLayout>
   );
