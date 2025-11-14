@@ -21,7 +21,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
       .split(/\r?\n/)
       .filter((line) => line.trim().length > 0)
       .map((line, index) => (
-        <p key={`${line}-${index}`} className="leading-tight whitespace-nowrap">
+        <p key={`${line}-${index}`} className="leading-tight break-words" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
           {line}
         </p>
       ));
@@ -100,22 +100,22 @@ const InvoiceTemplate = (data: InvoiceType) => {
 
         {/* Passenger & itinerary table */}
         <div className="overflow-hidden rounded-lg border border-gray-400">
-          <table className="min-w-full border-collapse">
+          <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
             <thead className="bg-gray-100 text-gray-800 uppercase text-xs tracking-widest">
               <tr>
-                <th className="border border-gray-400 px-4 py-3 text-left w-44">
+                <th className="border border-gray-400 px-4 py-3 text-left" style={{ width: '15%' }}>
                   Passenger Name
                 </th>
-                <th className="border border-gray-400 px-4 py-3 text-left w-72">
+                <th className="border border-gray-400 px-4 py-3 text-left" style={{ width: '35%' }}>
                   Route
                 </th>
-                <th className="border border-gray-400 px-4 py-3 text-left w-36">
+                <th className="border border-gray-400 px-4 py-3 text-left" style={{ width: '15%' }}>
                   Airlines
                 </th>
-                <th className="border border-gray-400 px-4 py-3 text-left w-32">
+                <th className="border border-gray-400 px-4 py-3 text-left" style={{ width: '15%' }}>
                   Service Type
                 </th>
-                <th className="border border-gray-400 px-4 py-3 text-right w-32">
+                <th className="border border-gray-400 px-4 py-3 text-right" style={{ width: '20%' }}>
                   Amount
                 </th>
               </tr>
@@ -133,10 +133,10 @@ const InvoiceTemplate = (data: InvoiceType) => {
               ) : (
                 itinerary.map((item, index) => (
                   <tr key={index} className="align-top">
-                    <td className="border border-gray-400 px-4 py-4 font-semibold text-gray-900">
+                    <td className="border border-gray-400 px-4 py-4 font-semibold text-gray-900 break-words">
                       {item.passengerName || `Passenger ${index + 1}`}
                     </td>
-                    <td className="border border-gray-400 px-4 py-4 space-y-1">
+                    <td className="border border-gray-400 px-4 py-4 space-y-1 break-words" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                       {renderMultiline(item.description)}
                       {!item.description && (
                         <p className="italic text-gray-400">
@@ -144,7 +144,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
                         </p>
                       )}
                     </td>
-                    <td className="border border-gray-400 px-4 py-4 space-y-1">
+                    <td className="border border-gray-400 px-4 py-4 space-y-1 break-words">
                       {renderMultiline(item.name)}
                       {!item.name && (
                         <p className="italic text-gray-400">
@@ -152,10 +152,10 @@ const InvoiceTemplate = (data: InvoiceType) => {
                         </p>
                       )}
                     </td>
-                    <td className="border border-gray-400 px-4 py-4 text-gray-700">
+                    <td className="border border-gray-400 px-4 py-4 text-gray-700 break-words">
                       {item.serviceType || "-"}
                     </td>
-                    <td className="border border-gray-400 px-4 py-4 text-right font-medium">
+                    <td className="border border-gray-400 px-4 py-4 text-right font-medium" style={{ minWidth: '120px' }}>
                       {formatNumberWithCommas(Number(item.total) || 0)}{" "}
                       {details.currency}
                     </td>
