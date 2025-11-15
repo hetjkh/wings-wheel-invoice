@@ -103,10 +103,10 @@ const InvoiceTemplate = (data: InvoiceType) => {
           <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
             <thead className="bg-gray-100 text-gray-800 uppercase text-xs tracking-widest">
               <tr>
-                <th className="border border-gray-400 px-4 py-3 text-left" style={{ width: '15%' }}>
+                <th className="border border-gray-400 px-4 py-3 text-left" style={{ width: '18%' }}>
                   Passenger Name
                 </th>
-                <th className="border border-gray-400 px-4 py-3 text-left" style={{ width: '35%' }}>
+                <th className="border border-gray-400 px-4 py-3 text-left" style={{ width: '32%' }}>
                   Route
                 </th>
                 <th className="border border-gray-400 px-4 py-3 text-left" style={{ width: '15%' }}>
@@ -133,7 +133,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
               ) : (
                 itinerary.map((item, index) => (
                   <tr key={index} className="align-top">
-                    <td className="border border-gray-400 px-4 py-4 font-semibold text-gray-900 break-words">
+                    <td className="border border-gray-400 px-4 py-4 font-semibold text-gray-900" style={{ wordBreak: 'normal', overflowWrap: 'normal' }}>
                       {item.passengerName || `Passenger ${index + 1}`}
                     </td>
                     <td className="border border-gray-400 px-4 py-4 space-y-1 break-words" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
