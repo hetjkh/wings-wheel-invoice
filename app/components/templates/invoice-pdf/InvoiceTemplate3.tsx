@@ -114,7 +114,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
                   Airlines
                 </th>
                 <th className="border border-gray-400 px-4 py-3 text-left" style={{ width: '15%' }}>
-                  Service Type
+                  Type of Service
                 </th>
                 <th className="border border-gray-400 px-4 py-3 text-right" style={{ width: '20%' }}>
                   Amount
@@ -170,7 +170,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
                           </span>
                         </td>
                         <td className="border border-gray-400 px-4 py-2 text-right font-medium">
-                          {formatNumberWithCommas(Number(item.total) || 0)}{" "}
+                          {formatNumberWithCommas(Number(item.vat) || 0)}{" "}
                           {details.currency}
                         </td>
                       </tr>

@@ -17,14 +17,11 @@ import { Label } from "@/components/ui/label";
 // Components
 import {
     BaseButton,
-    InvoiceTemplate1,
-    InvoiceTemplate2,
     InvoiceTemplate3,
 } from "@/app/components";
 
 // Template images
 import template2 from "@/public/assets/img/invoice-2-example.png";
-import template1 from "@/public/assets/img/invoice-1-example.png";
 
 // Icons
 import { Check } from "lucide-react";
@@ -36,20 +33,6 @@ const TemplateSelector = () => {
     const { watch, setValue } = useFormContext<InvoiceType>();
     const formValues = watch();
     const templates = [
-        {
-            id: 1,
-            name: "Template 1",
-            description: "Template 1 description",
-            img: template1,
-            component: <InvoiceTemplate1 {...formValues} />,
-        },
-        {
-            id: 2,
-            name: "Template 2",
-            description: "Second template",
-            img: template2,
-            component: <InvoiceTemplate2 {...formValues} />,
-        },
         {
             id: 3,
             name: "Flight Itinerary",

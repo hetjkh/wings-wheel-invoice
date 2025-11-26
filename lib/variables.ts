@@ -177,7 +177,7 @@ export const FORM_DEFAULT_VALUES = {
     additionalNotes: "",
     paymentTerms: "",
     totalAmountInWords: "",
-    pdfTemplate: 1,
+    pdfTemplate: 3,
     signature: {
       data: "https://res.cloudinary.com/dvrko1y0a/image/upload/v1762962336/7379e2cf-8c90-4e2f-a2b0-4ddbacbd65dd_ad36bo.jpg",
     },
@@ -261,6 +261,6 @@ export const FORM_FILL_VALUES = {
     subTotal: "850",
     totalAmount: "850",
     totalAmountInWords: "Eight Hundred Fifty",
-    pdfTemplate: 1,
+    pdfTemplate: 3,
   },
 };
