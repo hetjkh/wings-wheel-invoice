@@ -69,6 +69,11 @@ const SingleItem = ({
         control,
     });
 
+    const vat = useWatch({
+        name: `${name}[${index}].vat`,
+        control,
+    });
+
     // Currency
     const currency = useWatch({
         name: `details.currency`,
@@ -82,13 +87,16 @@ const SingleItem = ({
     });
 
     useEffect(() => {
-        // Calculate total when rate changes (quantity is always 1 for passengers)
+        // Calculate total when rate or VAT changes (quantity is always 1 for passengers)
+        // Total = rate + VAT amount
         if (rate != undefined) {
-            const calculatedTotal = (rate * 1).toFixed(2);
+            const rateValue = Number(rate) || 0;
+            const vatValue = Number(vat) || 0;
+            const calculatedTotal = (rateValue + vatValue).toFixed(2);
             setValue(`${name}[${index}].total`, calculatedTotal);
             setValue(`${name}[${index}].quantity`, 1);
         }
-    }, [rate, setValue, name, index]);
+    }, [rate, vat, setValue, name, index]);
 
     // DnD
     const {

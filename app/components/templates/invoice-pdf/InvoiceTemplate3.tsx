@@ -158,7 +158,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
                         {item.serviceType || "-"}
                       </td>
                       <td className="border border-gray-400 px-4 py-4 text-right font-medium" style={{ minWidth: '120px' }}>
-                        {formatNumberWithCommas(Number(item.total) || 0)}{" "}
+                        {formatNumberWithCommas(Number(item.unitPrice) || 0)}{" "}
                         {details.currency}
                       </td>
                     </tr>
@@ -170,7 +170,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
                           </span>
                         </td>
                         <td className="border border-gray-400 px-4 py-2 text-right font-medium">
-                          {formatNumberWithCommas(Number(item.vat) || 0)}{" "}
+                          {formatNumberWithCommas(Number(item.total) || 0)}{" "}
                           {details.currency}
                         </td>
                       </tr>

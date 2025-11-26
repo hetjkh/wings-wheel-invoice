@@ -174,6 +174,7 @@ export const ChargesContextProvider = ({ children }: ChargesContextProps) => {
         // Here Number(item.total) fixes a bug where an extra zero appears
         // at the beginning of subTotal caused by toFixed(2) in item.total in single item
         // Reason: toFixed(2) returns string, not a number instance
+        // Note: item.total already includes VAT (rate + vat) from SingleItem calculation
         const totalSum: number = itemsArray.reduce(
             (sum: number, item: ItemType) => sum + Number(item.total),
             0
