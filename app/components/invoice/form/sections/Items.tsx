@@ -5,6 +5,10 @@ import React, { useCallback, useState, useEffect, useRef } from "react";
 // RHF
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
+// ShadCn
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+
 // DnD
 import {
     DndContext,
@@ -51,6 +55,17 @@ const Items = () => {
         name: "details.numberOfPassengers",
     });
 
+    // Watch VAT toggle and template
+    const showVat = useWatch({
+        control,
+        name: "details.showVat",
+    });
+
+    const pdfTemplate = useWatch({
+        control,
+        name: "details.pdfTemplate",
+    });
+
     // Ref to track if we're updating to prevent infinite loops
     const isUpdatingRef = useRef(false);
     const lastPassengerCountRef = useRef<number | undefined>(undefined);
@@ -78,6 +93,8 @@ const Items = () => {
                         total: 0,
                         passengerName: "",
                         serviceType: "",
+                        vatPercentage: undefined,
+                        vat: undefined,
                     });
                 }
             } else if (numberOfPassengers < currentCount && currentCount > 0) {
@@ -108,6 +125,7 @@ const Items = () => {
             total: 0,
             passengerName: "",
             serviceType: "",
+            vat: undefined,
         });
     };
 
@@ -165,6 +183,20 @@ const Items = () => {
                     vertical
                 />
             </div>
+
+            {/* VAT Toggle - Only show for Template 3 */}
+            {pdfTemplate === 3 && (
+                <div className="mb-4 flex items-center gap-3">
+                    <Label htmlFor="showVat">Show VAT in Template</Label>
+                    <Switch
+                        id="showVat"
+                        checked={showVat || false}
+                        onCheckedChange={(value) => {
+                            setValue("details.showVat", value);
+                        }}
+                    />
+                </div>
+            )}
 
             <DndContext
                 sensors={sensors}

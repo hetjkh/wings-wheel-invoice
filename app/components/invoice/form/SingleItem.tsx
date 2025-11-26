@@ -12,20 +12,6 @@ import { CSS } from "@dnd-kit/utilities";
 // ShadCn
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 
 // Components
 import { BaseButton, FormInput, FormTextarea } from "@/app/components";
@@ -75,6 +61,11 @@ const SingleItem = ({
 
     const total = useWatch({
         name: `${name}[${index}].total`,
+        control,
+    });
+
+    const vatPercentage = useWatch({
+        name: `${name}[${index}].vatPercentage`,
         control,
     });
 
@@ -181,32 +172,12 @@ const SingleItem = ({
                         vertical
                     />
 
-                    <FormField
-                        control={control}
-                        name={`${name}[${index}].serviceType` as any}
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Service Type</FormLabel>
-                                <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                    value={field.value}
-                                >
-                                    <FormControl>
-                                        <SelectTrigger className="w-[12rem]">
-                                            <SelectValue placeholder="Select service type" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Economy class">Economy class</SelectItem>
-                                        <SelectItem value="Business class">Business class</SelectItem>
-                                        <SelectItem value="Premium economy class">Premium economy class</SelectItem>
-                                        <SelectItem value="First class">First class</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
+                    <FormInput
+                        name={`${name}[${index}].serviceType`}
+                        label="Service Type"
+                        placeholder="Enter service type"
+                        className="w-[12rem]"
+                        vertical
                     />
 
                     <FormInput
@@ -215,6 +186,26 @@ const SingleItem = ({
                         label="Rate"
                         labelHelper={`(${currency})`}
                         placeholder="Enter rate"
+                        className="w-[8rem]"
+                        vertical
+                    />
+
+                    <FormInput
+                        name={`${name}[${index}].vatPercentage`}
+                        type="number"
+                        label="VAT %"
+                        labelHelper="(%)"
+                        placeholder="Enter VAT %"
+                        className="w-[8rem]"
+                        vertical
+                    />
+
+                    <FormInput
+                        name={`${name}[${index}].vat`}
+                        type="number"
+                        label="VAT Amount"
+                        labelHelper={`(${currency})`}
+                        placeholder="Enter VAT amount"
                         className="w-[8rem]"
                         vertical
                     />

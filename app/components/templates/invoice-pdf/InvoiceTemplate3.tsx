@@ -14,6 +14,7 @@ const InvoiceTemplate = (data: InvoiceType) => {
   const { sender, receiver, details } = data;
 
   const itinerary = details.items || [];
+  const showVat = details.showVat || false;
 
   const renderMultiline = (value?: string) => {
     if (!value) return null;
@@ -132,34 +133,49 @@ const InvoiceTemplate = (data: InvoiceType) => {
                 </tr>
               ) : (
                 itinerary.map((item, index) => (
-                  <tr key={index} className="align-top">
-                    <td className="border border-gray-400 px-4 py-4 font-semibold text-gray-900" style={{ wordBreak: 'normal', overflowWrap: 'normal' }}>
-                      {item.passengerName || `Passenger ${index + 1}`}
-                    </td>
-                    <td className="border border-gray-400 px-4 py-4 space-y-1 break-words" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-                      {renderMultiline(item.description)}
-                      {!item.description && (
-                        <p className="italic text-gray-400">
-                          Add travel details in the item description field.
-                        </p>
-                      )}
-                    </td>
-                    <td className="border border-gray-400 px-4 py-4 space-y-1 break-words">
-                      {renderMultiline(item.name)}
-                      {!item.name && (
-                        <p className="italic text-gray-400">
-                          Specify airline names in the item title.
-                        </p>
-                      )}
-                    </td>
-                    <td className="border border-gray-400 px-4 py-4 text-gray-700 break-words">
-                      {item.serviceType || "-"}
-                    </td>
-                    <td className="border border-gray-400 px-4 py-4 text-right font-medium" style={{ minWidth: '120px' }}>
-                      {formatNumberWithCommas(Number(item.total) || 0)}{" "}
-                      {details.currency}
-                    </td>
-                  </tr>
+                  <React.Fragment key={index}>
+                    <tr className="align-top">
+                      <td className="border border-gray-400 px-4 py-4 font-semibold text-gray-900" style={{ wordBreak: 'normal', overflowWrap: 'normal' }}>
+                        {item.passengerName || `Passenger ${index + 1}`}
+                      </td>
+                      <td className="border border-gray-400 px-4 py-4 space-y-1 break-words" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                        {renderMultiline(item.description)}
+                        {!item.description && (
+                          <p className="italic text-gray-400">
+                            Add travel details in the item description field.
+                          </p>
+                        )}
+                      </td>
+                      <td className="border border-gray-400 px-4 py-4 space-y-1 break-words">
+                        {renderMultiline(item.name)}
+                        {!item.name && (
+                          <p className="italic text-gray-400">
+                            Specify airline names in the item title.
+                          </p>
+                        )}
+                      </td>
+                      <td className="border border-gray-400 px-4 py-4 text-gray-700 break-words">
+                        {item.serviceType || "-"}
+                      </td>
+                      <td className="border border-gray-400 px-4 py-4 text-right font-medium" style={{ minWidth: '120px' }}>
+                        {formatNumberWithCommas(Number(item.total) || 0)}{" "}
+                        {details.currency}
+                      </td>
+                    </tr>
+                    {showVat && item.vat !== undefined && Number(item.vat) > 0 && (
+                      <tr className="align-top">
+                        <td className="border border-gray-400 px-4 py-2 text-gray-700" colSpan={4}>
+                          <span className="font-medium">
+                            VAT{item.vatPercentage ? ` = ${item.vatPercentage}%` : ''}
+                          </span>
+                        </td>
+                        <td className="border border-gray-400 px-4 py-2 text-right font-medium">
+                          {formatNumberWithCommas(Number(item.vat) || 0)}{" "}
+                          {details.currency}
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))
               )}
             </tbody>

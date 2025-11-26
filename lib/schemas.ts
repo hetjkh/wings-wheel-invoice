@@ -112,6 +112,8 @@ const ItemSchema = z.object({
     total: fieldValidators.stringToNumber,
     passengerName: fieldValidators.stringOptional,
     serviceType: fieldValidators.stringOptional,
+    vatPercentage: fieldValidators.stringToNumber.optional(),
+    vat: fieldValidators.stringToNumber.optional(),
 });
 
 const PaymentInformationSchema = z.object({
@@ -165,6 +167,7 @@ const InvoiceDetailsSchema = z.object({
     signature: SignatureSchema.optional(),
     updatedAt: fieldValidators.stringOptional,
     pdfTemplate: z.number(),
+    showVat: z.boolean().optional(),
 });
 
 const InvoiceSchema = z.object({
