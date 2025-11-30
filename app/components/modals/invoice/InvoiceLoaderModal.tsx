@@ -32,7 +32,7 @@ const InvoiceLoaderModal = ({ children }: InvoiceLoaderModalType) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="pb-2 border-b">
           <DialogTitle>Saved Invoices</DialogTitle>
           <DialogDescription>

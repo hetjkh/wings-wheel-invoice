@@ -8,6 +8,22 @@ import { useFormContext } from "react-hook-form";
 // ShadCn
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 // Components
 import { BaseButton } from "@/app/components";
@@ -24,13 +40,41 @@ import { DATE_OPTIONS, FORM_DEFAULT_VALUES } from "@/lib/variables";
 // Types
 import { InvoiceType } from "@/types";
 
+// Icons
+import { CalendarIcon, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+
 type SavedInvoicesListProps = {
     setModalState: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
+type FilterType = "all" | "sender" | "receiver";
+type SortType = 
+    | "date-desc" 
+    | "date-asc" 
+    | "month-desc" 
+    | "month-asc" 
+    | "year-desc" 
+    | "year-asc"
+    | "amount-desc"
+    | "amount-asc"
+    | "invoice-number"
+    | "sender-name"
+    | "receiver-name";
+
+type GroupByType = "none" | "date" | "month" | "year" | "sender" | "receiver" | "currency";
+
 const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
     const { savedInvoices, onFormSubmit, deleteInvoice } = useInvoiceContext();
     const [searchQuery, setSearchQuery] = useState("");
+    const [filterType, setFilterType] = useState<FilterType>("all");
+    const [sortType, setSortType] = useState<SortType>("date-desc");
+    const [groupBy, setGroupBy] = useState<GroupByType>("none");
+    const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+    const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+    const [amountMin, setAmountMin] = useState<string>("");
+    const [amountMax, setAmountMax] = useState<string>("");
+    const [selectedCurrency, setSelectedCurrency] = useState<string>("all");
 
     const { reset } = useFormContext<InvoiceType>();
 
@@ -116,16 +160,77 @@ const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
         onFormSubmit(selectedInvoice);
     };
 
-    // Filter invoices based on search query
-    const filteredInvoices = useMemo(() => {
-        if (!searchQuery.trim()) {
-            return savedInvoices.map((invoice, idx) => ({ invoice, originalIdx: idx }));
-        }
+    // Get unique sender and receiver names for filter dropdown
+    const uniqueSenders = useMemo(() => {
+        const senders = new Set<string>();
+        savedInvoices.forEach((invoice) => {
+            if (invoice.sender.name) {
+                senders.add(invoice.sender.name);
+            }
+        });
+        return Array.from(senders).sort();
+    }, [savedInvoices]);
 
-        const query = searchQuery.toLowerCase().trim();
-        return savedInvoices
-            .map((invoice, idx) => ({ invoice, originalIdx: idx }))
-            .filter(({ invoice }) => {
+    const uniqueReceivers = useMemo(() => {
+        const receivers = new Set<string>();
+        savedInvoices.forEach((invoice) => {
+            if (invoice.receiver.name) {
+                receivers.add(invoice.receiver.name);
+            }
+        });
+        return Array.from(receivers).sort();
+    }, [savedInvoices]);
+
+    const uniqueCurrencies = useMemo(() => {
+        const currencies = new Set<string>();
+        savedInvoices.forEach((invoice) => {
+            if (invoice.details.currency) {
+                currencies.add(invoice.details.currency);
+            }
+        });
+        return Array.from(currencies).sort();
+    }, [savedInvoices]);
+
+    // Helper function to parse invoice date
+    const parseInvoiceDate = (invoice: InvoiceType): Date => {
+        if (invoice.details.invoiceDate) {
+            const date = new Date(invoice.details.invoiceDate);
+            return isNaN(date.getTime()) ? new Date(0) : date;
+        }
+        return new Date(0);
+    };
+
+    // Helper function to get month from date
+    const getMonthKey = (date: Date): string => {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    };
+
+    // Helper function to get year from date
+    const getYearKey = (date: Date): string => {
+        return String(date.getFullYear());
+    };
+
+    // Filter invoices based on search query, filter type, date range, amount range, and currency
+    const filteredInvoices = useMemo(() => {
+        let filtered = savedInvoices.map((invoice, idx) => ({ invoice, originalIdx: idx }));
+
+        // Apply filter type (sender/receiver)
+        if (filterType === "sender" && searchQuery.trim()) {
+            const query = searchQuery.toLowerCase().trim();
+            filtered = filtered.filter(({ invoice }) => {
+                const senderName = invoice.sender.name?.toLowerCase() || "";
+                return senderName.includes(query);
+            });
+        } else if (filterType === "receiver" && searchQuery.trim()) {
+            const query = searchQuery.toLowerCase().trim();
+            filtered = filtered.filter(({ invoice }) => {
+                const receiverName = invoice.receiver.name?.toLowerCase() || "";
+                return receiverName.includes(query);
+            });
+        } else if (searchQuery.trim()) {
+            // General search across all fields
+            const query = searchQuery.toLowerCase().trim();
+            filtered = filtered.filter(({ invoice }) => {
                 const invoiceNumber = invoice.details.invoiceNumber?.toLowerCase() || "";
                 const senderName = invoice.sender.name?.toLowerCase() || "";
                 const receiverName = invoice.receiver.name?.toLowerCase() || "";
@@ -136,96 +241,530 @@ const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
                     receiverName.includes(query)
                 );
             });
-    }, [savedInvoices, searchQuery]);
+        }
+
+        // Apply date range filter
+        if (dateFrom || dateTo) {
+            filtered = filtered.filter(({ invoice }) => {
+                const invoiceDate = parseInvoiceDate(invoice);
+                if (dateFrom && invoiceDate < dateFrom) return false;
+                if (dateTo) {
+                    const toDate = new Date(dateTo);
+                    toDate.setHours(23, 59, 59, 999); // Include entire day
+                    if (invoiceDate > toDate) return false;
+                }
+                return true;
+            });
+        }
+
+        // Apply amount range filter
+        if (amountMin || amountMax) {
+            filtered = filtered.filter(({ invoice }) => {
+                const amount = Number(invoice.details.totalAmount) || 0;
+                if (amountMin && amount < Number(amountMin)) return false;
+                if (amountMax && amount > Number(amountMax)) return false;
+                return true;
+            });
+        }
+
+        // Apply currency filter
+        if (selectedCurrency !== "all") {
+            filtered = filtered.filter(({ invoice }) => {
+                return invoice.details.currency === selectedCurrency;
+            });
+        }
+
+        return filtered;
+    }, [savedInvoices, searchQuery, filterType, dateFrom, dateTo, amountMin, amountMax, selectedCurrency]);
+
+    // Sort invoices
+    const sortedInvoices = useMemo(() => {
+        const sorted = [...filteredInvoices];
+        
+        sorted.sort((a, b) => {
+            const invoiceA = a.invoice;
+            const invoiceB = b.invoice;
+
+            switch (sortType) {
+                case "date-desc":
+                    return parseInvoiceDate(invoiceB).getTime() - parseInvoiceDate(invoiceA).getTime();
+                case "date-asc":
+                    return parseInvoiceDate(invoiceA).getTime() - parseInvoiceDate(invoiceB).getTime();
+                case "month-desc":
+                    return getMonthKey(parseInvoiceDate(invoiceB)).localeCompare(getMonthKey(parseInvoiceDate(invoiceA)));
+                case "month-asc":
+                    return getMonthKey(parseInvoiceDate(invoiceA)).localeCompare(getMonthKey(parseInvoiceDate(invoiceB)));
+                case "year-desc":
+                    return getYearKey(parseInvoiceDate(invoiceB)).localeCompare(getYearKey(parseInvoiceDate(invoiceA)));
+                case "year-asc":
+                    return getYearKey(parseInvoiceDate(invoiceA)).localeCompare(getYearKey(parseInvoiceDate(invoiceB)));
+                case "amount-desc":
+                    return (Number(invoiceB.details.totalAmount) || 0) - (Number(invoiceA.details.totalAmount) || 0);
+                case "amount-asc":
+                    return (Number(invoiceA.details.totalAmount) || 0) - (Number(invoiceB.details.totalAmount) || 0);
+                case "invoice-number":
+                    return (invoiceA.details.invoiceNumber || "").localeCompare(invoiceB.details.invoiceNumber || "");
+                case "sender-name":
+                    return (invoiceA.sender.name || "").localeCompare(invoiceB.sender.name || "");
+                case "receiver-name":
+                    return (invoiceA.receiver.name || "").localeCompare(invoiceB.receiver.name || "");
+                default:
+                    return 0;
+            }
+        });
+
+        return sorted;
+    }, [filteredInvoices, sortType]);
+
+    // Group invoices
+    const groupedInvoices = useMemo(() => {
+        if (groupBy === "none") {
+            return { "All Invoices": sortedInvoices };
+        }
+
+        const groups: Record<string, typeof sortedInvoices> = {};
+        const groupOrder: Record<string, number> = {}; // For sorting groups
+
+        sortedInvoices.forEach((item) => {
+            let key: string;
+            let sortKey: number = 0;
+            const invoice = item.invoice;
+            const date = parseInvoiceDate(invoice);
+
+            switch (groupBy) {
+                case "date":
+                    key = date.toLocaleDateString("en-US", DATE_OPTIONS);
+                    sortKey = date.getTime();
+                    break;
+                case "month":
+                    // Format: "January 2024", "February 2024", etc.
+                    key = date.toLocaleDateString("en-US", { year: "numeric", month: "long" });
+                    // Sort key: year * 100 + month (e.g., 202401 for January 2024)
+                    sortKey = date.getFullYear() * 100 + date.getMonth() + 1;
+                    break;
+                case "year":
+                    key = getYearKey(date);
+                    sortKey = date.getFullYear();
+                    break;
+                case "sender":
+                    key = invoice.sender.name || "Unknown Sender";
+                    sortKey = 0;
+                    break;
+                case "receiver":
+                    key = invoice.receiver.name || "Unknown Receiver";
+                    sortKey = 0;
+                    break;
+                case "currency":
+                    key = invoice.details.currency || "Unknown Currency";
+                    sortKey = 0;
+                    break;
+                default:
+                    key = "All Invoices";
+                    sortKey = 0;
+            }
+
+            if (!groups[key]) {
+                groups[key] = [];
+                groupOrder[key] = sortKey;
+            }
+            groups[key].push(item);
+        });
+
+        // Sort groups by their sort key for chronological ordering
+        if (groupBy === "month" || groupBy === "year" || groupBy === "date") {
+            const sortedGroups: Record<string, typeof sortedInvoices> = {};
+            Object.keys(groups)
+                .sort((a, b) => {
+                    if (groupBy === "month" || groupBy === "year" || groupBy === "date") {
+                        return groupOrder[b] - groupOrder[a]; // Descending (newest first)
+                    }
+                    return a.localeCompare(b);
+                })
+                .forEach((key) => {
+                    sortedGroups[key] = groups[key];
+                });
+            return sortedGroups;
+        }
+
+        return groups;
+    }, [sortedInvoices, groupBy]);
+
+    // Calculate statistics
+    const statistics = useMemo(() => {
+        const totalInvoices = filteredInvoices.length;
+        const totalAmount = filteredInvoices.reduce((sum, { invoice }) => {
+            return sum + (Number(invoice.details.totalAmount) || 0);
+        }, 0);
+        const currencies = new Set(filteredInvoices.map(({ invoice }) => invoice.details.currency));
+        
+        return {
+            totalInvoices,
+            totalAmount,
+            uniqueCurrencies: currencies.size,
+        };
+    }, [filteredInvoices]);
+
+    const clearFilters = () => {
+        setSearchQuery("");
+        setFilterType("all");
+        setDateFrom(undefined);
+        setDateTo(undefined);
+        setAmountMin("");
+        setAmountMax("");
+        setSelectedCurrency("all");
+    };
+
+    const renderInvoiceCard = (invoice: InvoiceType, originalIdx: number, idx: number) => (
+        <Card
+            key={idx}
+            className="p-2 border rounded-sm hover:border-blue-500 hover:shadow-lg cursor-pointer"
+        >
+            <CardContent className="flex justify-between">
+                <div>
+                    <p className="font-semibold">
+                        Invoice #{invoice.details.invoiceNumber}{" "}
+                    </p>
+                    <small className="text-gray-500">
+                        Date: {parseInvoiceDate(invoice).toLocaleDateString("en-US", DATE_OPTIONS)} | 
+                        Updated: {invoice.details.updatedAt || "N/A"}
+                    </small>
+
+                    <div className="mt-2">
+                        <p>Sender: {invoice.sender.name}</p>
+                        <p>Receiver: {invoice.receiver.name}</p>
+                        <p>
+                            Total:{" "}
+                            <span className="font-semibold">
+                                {formatNumberWithCommas(
+                                    Number(invoice.details.totalAmount)
+                                )}{" "}
+                                {invoice.details.currency}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                    <BaseButton
+                        tooltipLabel="Load invoice details into the form"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => load(invoice)}
+                    >
+                        Load
+                    </BaseButton>
+
+                    <BaseButton
+                        tooltipLabel="Load invoice and generate PDF"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => loadAndGeneratePdf(invoice)}
+                    >
+                        Load & Generate
+                    </BaseButton>
+                    <BaseButton
+                        variant="destructive"
+                        size="sm"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            deleteInvoice(originalIdx);
+                        }}
+                    >
+                        Delete
+                    </BaseButton>
+                </div>
+            </CardContent>
+        </Card>
+    );
 
     return (
         <>
-            <div className="mb-4">
-                <Input
-                    type="text"
-                    placeholder="Search by invoice number, sender name, or receiver name..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full"
-                />
-            </div>
-            <div className="flex flex-col gap-5 overflow-y-auto max-h-72">
-                {filteredInvoices.map(({ invoice, originalIdx }, idx) => (
-                    <Card
-                        key={idx}
-                        className="p-2 border rounded-sm hover:border-blue-500 hover:shadow-lg cursor-pointer"
-                        // onClick={() => handleSelect(invoice)}
-                    >
-                        <CardContent className="flex justify-between">
-                            <div>
-                                {/* <FileText /> */}
-                                <p className="font-semibold">
-                                    Invoice #{invoice.details.invoiceNumber}{" "}
-                                </p>
-                                <small className="text-gray-500">
-                                    Updated at: {invoice.details.updatedAt}
-                                </small>
+            <Tabs defaultValue="filters" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="filters">Filters & Search</TabsTrigger>
+                    <TabsTrigger value="statistics">Statistics</TabsTrigger>
+                </TabsList>
 
-                                <div>
-                                    <p>Sender: {invoice.sender.name}</p>
-                                    <p>Receiver: {invoice.receiver.name}</p>
-                                    <p>
-                                        Total:{" "}
-                                        <span className="font-semibold">
-                                            {formatNumberWithCommas(
-                                                Number(
-                                                    invoice.details.totalAmount
-                                                )
-                                            )}{" "}
-                                            {invoice.details.currency}
-                                        </span>
-                                    </p>
+                <TabsContent value="filters" className="space-y-3">
+                    {/* Statistics Bar */}
+                    <div className="flex gap-2 flex-wrap items-center p-2 bg-muted rounded-md">
+                        <Badge variant="secondary">
+                            {statistics.totalInvoices} Invoice{statistics.totalInvoices !== 1 ? 's' : ''}
+                        </Badge>
+                        <Badge variant="secondary">
+                            Total: {formatNumberWithCommas(statistics.totalAmount)}
+                        </Badge>
+                        <Badge variant="secondary">
+                            {statistics.uniqueCurrencies} Currency{statistics.uniqueCurrencies !== 1 ? 's' : ''}
+                        </Badge>
+                        {(searchQuery || filterType !== "all" || dateFrom || dateTo || amountMin || amountMax || selectedCurrency !== "all") && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={clearFilters}
+                                className="ml-auto"
+                            >
+                                <X className="h-4 w-4 mr-1" />
+                                Clear Filters
+                            </Button>
+                        )}
+                    </div>
+
+                    {/* Search and Filter Row */}
+                    <div className="flex gap-2 flex-wrap">
+                        <Select value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
+                            <SelectTrigger className="w-[150px]">
+                                <SelectValue placeholder="Filter by..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Invoices</SelectItem>
+                                <SelectItem value="sender">Filter by Sender</SelectItem>
+                                <SelectItem value="receiver">Filter by Receiver</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Input
+                            type="text"
+                            placeholder={
+                                filterType === "sender"
+                                    ? "Search by sender name..."
+                                    : filterType === "receiver"
+                                    ? "Search by receiver name..."
+                                    : "Search by invoice number, sender name, or receiver name..."
+                            }
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="flex-1 min-w-[200px]"
+                        />
+                    </div>
+
+                    {/* Quick Filter Buttons */}
+                    {filterType === "sender" && uniqueSenders.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                            {uniqueSenders.map((sender) => (
+                                <BaseButton
+                                    key={sender}
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setSearchQuery(sender)}
+                                    className="text-xs"
+                                >
+                                    {sender}
+                                </BaseButton>
+                            ))}
+                        </div>
+                    )}
+                    {filterType === "receiver" && uniqueReceivers.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                            {uniqueReceivers.map((receiver) => (
+                                <BaseButton
+                                    key={receiver}
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setSearchQuery(receiver)}
+                                    className="text-xs"
+                                >
+                                    {receiver}
+                                </BaseButton>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Advanced Filters Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {/* Date Range */}
+                        <div className="flex gap-2">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal",
+                                            !dateFrom && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {dateFrom ? dateFrom.toLocaleDateString() : "From Date"}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={dateFrom}
+                                        onSelect={setDateFrom}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                            {dateFrom && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setDateFrom(undefined)}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
+                        <div className="flex gap-2">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal",
+                                            !dateTo && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {dateTo ? dateTo.toLocaleDateString() : "To Date"}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={dateTo}
+                                        onSelect={setDateTo}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                            {dateTo && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setDateTo(undefined)}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Amount Range */}
+                        <div className="flex gap-2">
+                            <Input
+                                type="number"
+                                placeholder="Min Amount"
+                                value={amountMin}
+                                onChange={(e) => setAmountMin(e.target.value)}
+                                className="w-full"
+                            />
+                            <Input
+                                type="number"
+                                placeholder="Max Amount"
+                                value={amountMax}
+                                onChange={(e) => setAmountMax(e.target.value)}
+                                className="w-full"
+                            />
+                        </div>
+
+                        {/* Currency Filter */}
+                        <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Currency" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Currencies</SelectItem>
+                                {uniqueCurrencies.map((currency) => (
+                                    <SelectItem key={currency} value={currency}>
+                                        {currency}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        {/* Sort Options */}
+                        <Select value={sortType} onValueChange={(value) => setSortType(value as SortType)}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Sort by..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="date-desc">Date (Newest First)</SelectItem>
+                                <SelectItem value="date-asc">Date (Oldest First)</SelectItem>
+                                <SelectItem value="month-desc">Month (Newest First)</SelectItem>
+                                <SelectItem value="month-asc">Month (Oldest First)</SelectItem>
+                                <SelectItem value="year-desc">Year (Newest First)</SelectItem>
+                                <SelectItem value="year-asc">Year (Oldest First)</SelectItem>
+                                <SelectItem value="amount-desc">Amount (High to Low)</SelectItem>
+                                <SelectItem value="amount-asc">Amount (Low to High)</SelectItem>
+                                <SelectItem value="invoice-number">Invoice Number</SelectItem>
+                                <SelectItem value="sender-name">Sender Name</SelectItem>
+                                <SelectItem value="receiver-name">Receiver Name</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        {/* Group By */}
+                        <Select value={groupBy} onValueChange={(value) => setGroupBy(value as GroupByType)}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Group by..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">No Grouping</SelectItem>
+                                <SelectItem value="date">Group by Date</SelectItem>
+                                <SelectItem value="month">Group by Month</SelectItem>
+                                <SelectItem value="year">Group by Year</SelectItem>
+                                <SelectItem value="sender">Group by Sender</SelectItem>
+                                <SelectItem value="receiver">Group by Receiver</SelectItem>
+                                <SelectItem value="currency">Group by Currency</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="statistics" className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="text-2xl font-bold">{statistics.totalInvoices}</div>
+                                <p className="text-xs text-muted-foreground">Total Invoices</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="text-2xl font-bold">
+                                    {formatNumberWithCommas(statistics.totalAmount)}
                                 </div>
-                            </div>
+                                <p className="text-xs text-muted-foreground">Total Amount</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="text-2xl font-bold">{statistics.uniqueCurrencies}</div>
+                                <p className="text-xs text-muted-foreground">Unique Currencies</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
+            </Tabs>
 
-                            <div className="flex flex-col gap-2">
-                                <BaseButton
-                                    tooltipLabel="Load invoice details into the form"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => load(invoice)}
-                                >
-                                    Load
-                                </BaseButton>
-
-                                <BaseButton
-                                    tooltipLabel="Load invoice and generate PDF"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => loadAndGeneratePdf(invoice)}
-                                >
-                                    Load & Generate
-                                </BaseButton>
-                                {/* Remove Invoice Button */}
-                                <BaseButton
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        deleteInvoice(originalIdx);
-                                    }}
-                                >
-                                    Delete
-                                </BaseButton>
+            <div className="flex flex-col gap-5 overflow-y-auto max-h-[60vh] mt-4">
+                {groupBy === "none" ? (
+                    sortedInvoices.map(({ invoice, originalIdx }, idx) =>
+                        renderInvoiceCard(invoice, originalIdx, idx)
+                    )
+                ) : (
+                    Object.entries(groupedInvoices).map(([groupKey, invoices]) => (
+                        <div key={groupKey} className="space-y-3">
+                            <div className="sticky top-0 bg-background z-10 py-2 border-b">
+                                <h3 className="font-semibold text-lg">
+                                    {groupKey} <Badge variant="secondary">{invoices.length}</Badge>
+                                </h3>
                             </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                            {invoices.map(({ invoice, originalIdx }, idx) =>
+                                renderInvoiceCard(invoice, originalIdx, `${groupKey}-${idx}`)
+                            )}
+                        </div>
+                    ))
+                )}
 
                 {savedInvoices.length === 0 && (
-                    <div>
-                        <p>No saved invoices</p>
+                    <div className="text-center py-8">
+                        <p className="text-muted-foreground">No saved invoices</p>
                     </div>
                 )}
 
-                {savedInvoices.length > 0 && filteredInvoices.length === 0 && (
-                    <div>
-                        <p>No invoices found matching your search</p>
+                {savedInvoices.length > 0 && sortedInvoices.length === 0 && (
+                    <div className="text-center py-8">
+                        <p className="text-muted-foreground">No invoices found matching your filters</p>
                     </div>
                 )}
             </div>
