@@ -414,9 +414,9 @@ const SavedInvoicesList = ({ setModalState }: SavedInvoicesListProps) => {
         setSelectedCurrency("all");
     };
 
-    const renderInvoiceCard = (invoice: InvoiceType, originalIdx: number, idx: number) => (
+    const renderInvoiceCard = (invoice: InvoiceType, originalIdx: number, key: string | number) => (
         <Card
-            key={idx}
+            key={key}
             className="p-2 border rounded-sm hover:border-blue-500 hover:shadow-lg cursor-pointer"
         >
             <CardContent className="flex justify-between">
